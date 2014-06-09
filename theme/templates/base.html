@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html{% if DEFAULT_LANG %} lang='{{ DEFAULT_LANG }}'{% endif %}>
+  <head>
+    <meta charset='utf-8'>
+    <title>{% block title %}{{ SITENAME | striptags }}{% if SITESUBTITLE %}: {{ SITESUBTITLE | striptags }}{% endif %}{% endblock title %}</title>
+    <link href='{{ SITEURL }}/{{ THEME_STATIC_DIR }}/styles/normalize.css' rel='stylesheet'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  </head>
+  <body>
+    <header>
+      <h1><a href='{{ SITEURL }}' rel='home'>{{ SITENAME }}</a></h1>
+      {% if SITESUBTITLE %}
+      <p>{{ SITESUBTITLE }}</p>
+      {% endif %}
+    </header>
+    <main>
+      {% block content %}
+      {% endblock content %}
+    </main>
+  </body>
+</html>
