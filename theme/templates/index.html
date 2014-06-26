@@ -2,12 +2,13 @@
 
 {% block content %}
 {% if articles %}
+<h2>Articles</h2>
 <dl>
   {% for article in articles_page.object_list %}
   {# +09:00 is a workaround for https://github.com/getpelican/pelican/issues/962 #}
   <dt><time datetime='{{ article.date.isoformat() }}+09:00'>{{ article.locale_date }}</time></dt>
   <dd>
-    <h2><a href='{{ SITEURL }}/{{ article.url }}' rel='bookmark'>{{ article.title }}</a></h2>
+    <h3><a href='{{ SITEURL }}/{{ article.url }}' rel='bookmark'>{{ article.title }}</a></h3>
     {{ article.summary }}
   </dd>
   {% endfor %}
