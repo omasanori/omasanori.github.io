@@ -6,7 +6,7 @@ PELICANOPTS=
 BASEDIR=$(pwd)
 INPUTDIR=${BASEDIR}/content
 OUTPUTDIR=${BASEDIR}/output
-CONFFILE=${BASEDIR}/conf.py
+CONFFILE=${BASEDIR}/conf_publish.py
 
 COMMIT_MSG="Update."
 

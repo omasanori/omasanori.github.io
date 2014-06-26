@@ -9,7 +9,7 @@ PELICANOPTS=
 BASEDIR=$(pwd)
 INPUTDIR=$BASEDIR/content
 OUTPUTDIR=$BASEDIR/output
-CONFFILE=$BASEDIR/conf.py
+CONFFILE=$BASEDIR/conf_develop.py
 
 ###
 # Don't change stuff below here unless you are sure
