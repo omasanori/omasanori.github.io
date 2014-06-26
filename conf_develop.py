@@ -35,6 +35,8 @@ MONTH_ARCHIVE_SAVE_AS = 'blog/{date:%Y}/{date:%m}/index.html'
 DAY_ARCHIVE_URL       = 'blog/{date:%Y}/{date:%m}/{date:%d}/'
 DAY_ARCHIVE_SAVE_AS   = 'blog/{date:%Y}/{date:%m}/{date:%d}/index.html'
 
+PAGE_DIR = ''
+
 FEED_ALL_ATOM         = 'feeds/all.atom.xml'
 CATEGORY_FEED_ATOM    = 'feeds/%s.atom.xml'
 TRANSLATION_FEED_ATOM = None
