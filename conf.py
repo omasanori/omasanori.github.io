@@ -10,8 +10,8 @@ TIMEZONE            = 'Asia/Tokyo'
 DEFAULT_LANG        = 'ja'
 DEFAULT_DATE_FORMAT = '%Y-%m-%d'
 
-ARTICLE_URL           = 'posts/{date:%Y}/{date:%m}/{date:%d}/{slug}/{lang}/'
-ARTICLE_SAVE_AS       = 'posts/{date:%Y}/{date:%m}/{date:%d}/{slug}/{lang}/index.html'
+ARTICLE_URL           = 'posts/{date:%Y}/{date:%m}/{date:%d}/{slug}/'
+ARTICLE_SAVE_AS       = 'posts/{date:%Y}/{date:%m}/{date:%d}/{slug}/index.html'
 ARTICLE_LANG_URL      = ARTICLE_URL
 ARTICLE_LANG_SAVE_AS  = ARTICLE_SAVE_AS
 YEAR_ARCHIVE_SAVE_AS  = 'posts/{date:%Y}/index.html'
