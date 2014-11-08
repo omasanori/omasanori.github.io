@@ -9,5 +9,6 @@
   <dd><h3><a href='{{ SITEURL }}/{{ article.url }}' rel='bookmark'>{{ article.title }}</a></h3></dd>
   {% endfor %}
 </dl>
+{% include "snippets/pagination.html" %}
 {% endif %}
 {% endblock content %}
