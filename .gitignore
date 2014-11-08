@@ -2,4 +2,5 @@
 *.pid
 *.pyc
 *.swp
+cache/
 output/
