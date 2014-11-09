@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Brackets Salad</title><link href="http://omasanori.github.io/" rel="alternate"></link><link href="http://omasanori.github.io/feeds/all.atom.xml" rel="self"></link><id>http://omasanori.github.io/</id><updated>2014-07-02T17:50:00+09:00</updated><entry><title>Crossdevを使ってarm-none-eabiのツールチェインを用意する</title><link href="http://omasanori.github.io/blog/2014/07/02/crossdev-arm-none-eabi/" rel="alternate"></link><updated>2014-07-02T17:50:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-07-02:blog/2014/07/02/crossdev-arm-none-eabi/</id><summary type="html">&lt;pre class="literal-block"&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Brackets Salad</title><link href="http://omasanori.github.io/" rel="alternate"></link><link href="http://omasanori.github.io/feeds/all.atom.xml" rel="self"></link><id>http://omasanori.github.io/</id><updated>2014-11-09T18:59:00+09:00</updated><entry><title>revdep-rebuildでlibstdc++.so.*に依存したバイナリを探す方法</title><link href="http://omasanori.github.io/blog/2014/11/09/revdep-rebuild-libstdcxx/" rel="alternate"></link><updated>2014-11-09T18:59:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-11-09:blog/2014/11/09/revdep-rebuild-libstdcxx/</id><summary type="html">&lt;p&gt;Gentoo Linuxでlibstdc++.so.6に依存したバイナリを含むパッケージをまとめてリビルドしたい場合はrevdep-rebuildが利用できる。しかし、次のコマンドは意図したように動作しない。:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+revdep-rebuild -L libstdc++.so.6
+&lt;/pre&gt;
+&lt;p&gt;なぜなら、ライブラリ名は正規表現として解釈されるからだ。正しくは次の通り。:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+revdep-rebuild -L 'libstdc\+\+.so.6'
+&lt;/pre&gt;
+&lt;p&gt;libstdc++のABI非互換によって問題が起きたと思しき場合の応急処置として必要となったのでメモ。&lt;/p&gt;
+</summary></entry><entry><title>Crossdevを使ってarm-none-eabiのツールチェインを用意する</title><link href="http://omasanori.github.io/blog/2014/07/02/crossdev-arm-none-eabi/" rel="alternate"></link><updated>2014-07-02T17:50:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-07-02:blog/2014/07/02/crossdev-arm-none-eabi/</id><summary type="html">&lt;pre class="literal-block"&gt;
 $ crossdev -s4 --without-headers -t arm-none-eabi
 &lt;/pre&gt;
 &lt;p&gt;これだけでC・C++・Fortranのフロントエンドが用意される。楽。&lt;/p&gt;

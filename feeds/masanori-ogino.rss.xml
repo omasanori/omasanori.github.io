@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Brackets Salad</title><link>http://omasanori.github.io/</link><description></description><atom:link href="http://omasanori.github.io/feeds/masanori-ogino.rss.xml" rel="self"></atom:link><lastBuildDate>Wed, 02 Jul 2014 17:50:00 +0900</lastBuildDate><item><title>Crossdevを使ってarm-none-eabiのツールチェインを用意する</title><link>http://omasanori.github.io/blog/2014/07/02/crossdev-arm-none-eabi/</link><description>&lt;pre class="literal-block"&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Brackets Salad</title><link>http://omasanori.github.io/</link><description></description><atom:link href="http://omasanori.github.io/feeds/masanori-ogino.rss.xml" rel="self"></atom:link><lastBuildDate>Sun, 09 Nov 2014 18:59:00 +0900</lastBuildDate><item><title>revdep-rebuildでlibstdc++.so.*に依存したバイナリを探す方法</title><link>http://omasanori.github.io/blog/2014/11/09/revdep-rebuild-libstdcxx/</link><description>&lt;p&gt;Gentoo Linuxでlibstdc++.so.6に依存したバイナリを含むパッケージをまとめてリビルドしたい場合はrevdep-rebuildが利用できる。しかし、次のコマンドは意図したように動作しない。:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+revdep-rebuild -L libstdc++.so.6
+&lt;/pre&gt;
+&lt;p&gt;なぜなら、ライブラリ名は正規表現として解釈されるからだ。正しくは次の通り。:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+revdep-rebuild -L 'libstdc\+\+.so.6'
+&lt;/pre&gt;
+&lt;p&gt;libstdc++のABI非互換によって問題が起きたと思しき場合の応急処置として必要となったのでメモ。&lt;/p&gt;
+</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Masanori Ogino</dc:creator><pubDate>Sun, 09 Nov 2014 18:59:00 +0900</pubDate><guid>tag:omasanori.github.io,2014-11-09:blog/2014/11/09/revdep-rebuild-libstdcxx/</guid></item><item><title>Crossdevを使ってarm-none-eabiのツールチェインを用意する</title><link>http://omasanori.github.io/blog/2014/07/02/crossdev-arm-none-eabi/</link><description>&lt;pre class="literal-block"&gt;
 $ crossdev -s4 --without-headers -t arm-none-eabi
 &lt;/pre&gt;
 &lt;p&gt;これだけでC・C++・Fortranのフロントエンドが用意される。楽。&lt;/p&gt;
