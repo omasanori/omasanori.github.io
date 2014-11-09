@@ -37,8 +37,10 @@ DAY_ARCHIVE_SAVE_AS   = 'blog/{date:%Y}/{date:%m}/{date:%d}/index.html'
 
 PAGE_PATHS = []
 
-FEED_ALL_ATOM         = 'feeds/all.atom.xml'
-CATEGORY_FEED_ATOM    = 'feeds/%s.atom.xml'
+FEED_ALL_ATOM         = None # 'feeds/all.atom.xml'
+CATEGORY_FEED_ATOM    = None # 'feeds/%s.atom.xml'
+AUTHOR_FEED_ATOM      = None
+AUTHOR_FEED_RSS       = None
 TRANSLATION_FEED_ATOM = None
 
 LINKS = ()
