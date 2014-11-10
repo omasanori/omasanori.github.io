@@ -6,6 +6,7 @@
     <link href='{{ SITEURL }}/{% if THEME_STATIC_DIR %}{{ THEME_STATIC_DIR }}/{% endif %}styles/normalize.css' rel='stylesheet'>
     <link href='{{ SITEURL }}/{% if THEME_STATIC_DIR %}{{ THEME_STATIC_DIR }}/{% endif %}styles/main.css' rel='stylesheet'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    {% include "snippets/feed.html" %}
   </head>
   <body>
     <header>
