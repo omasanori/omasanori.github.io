@@ -11,16 +11,16 @@
 <link href='{{ FEED_DOMAIN }}/{{ FEED_RSS }}' type='application/rss+xml' rel='alternate' title='{{ SITENAME }}: Articles (RSS)'>
 {% endif %}
 {% if CATEGORY_FEED_ATOM and category %}
-<link href='{{ FEED_DOMAIN }}/{{ CATEGORY_FEED_ATOM }}' type='application/atom+xml' rel='alternate' title='{{ SITENAME }}: Articles for {{ category }} Category (Atom)'>
+<link href='{{ FEED_DOMAIN }}/{{ CATEGORY_FEED_ATOM }}' type='application/atom+xml' rel='alternate' title='{{ SITENAME }}: Articles for &ldquo;{{ category }}&rdquo; Category (Atom)'>
 {% endif %}
 {% if CATEGORY_FEED_RSS and category %}
-<link href='{{ FEED_DOMAIN }}/{{ CATEGORY_FEED_RSS }}' type='application/rss+xml' rel='alternate' title='{{ SITENAME }}: Articles for {{ category }} Category (RSS)'>
+<link href='{{ FEED_DOMAIN }}/{{ CATEGORY_FEED_RSS }}' type='application/rss+xml' rel='alternate' title='{{ SITENAME }}: Articles for &ldquo;{{ category }}&rdquo; Category (RSS)'>
 {% endif %}
 {% if TAG_FEED_ATOM and tag %}
-<link href='{{ FEED_DOMAIN }}/{{ TAG_FEED_ATOM }}' type='application/atom+xml' rel='alternate' title='{{ SITENAME }}: Articles Related to {{ tag }} Tag (Atom)'>
+<link href='{{ FEED_DOMAIN }}/{{ TAG_FEED_ATOM }}' type='application/atom+xml' rel='alternate' title='{{ SITENAME }}: Articles Related to &ldquo;{{ tag }}&rdquo; Tag (Atom)'>
 {% endif %}
 {% if TAG_FEED_RSS and tag %}
-<link href='{{ FEED_DOMAIN }}/{{ TAG_FEED_RSS }}' type='application/rss+xml' rel='alternate' title='{{ SITENAME }}: Articles Related to {{ tag }} Tag (RSS)'>
+<link href='{{ FEED_DOMAIN }}/{{ TAG_FEED_RSS }}' type='application/rss+xml' rel='alternate' title='{{ SITENAME }}: Articles Related to &ldquo;{{ tag }}&rdquo; Tag (RSS)'>
 {% endif %}
 {% if AUTHOR_FEED_ATOM and author %}
 <link href='{{ FEED_DOMAIN }}/{{ AUTHOR_FEED_ATOM }}' type='application/atom+xml' rel='alternate' title='{{ SITENAME }}: Articles by {{ author }} (Atom)'>
