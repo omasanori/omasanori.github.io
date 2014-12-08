@@ -20,11 +20,13 @@
 &lt;p&gt;Gentoo Linuxでは別の問題もあります。（バイナリパッケージではなく）ソースコードからビルドするパッケージでは、システムのライブラリを使う場合に比べてバンドルされたライブラリを使う場合はビルド時間が伸びることになります。負荷をかけてハードウェアやカーネルのバグを探したい場合や他に暖房器具がない場合を除けば、ビルド時間が短くて困ることはあまりありません。そういうわけで、gentoo-rustのdev-lang/rustパッケージはデフォルトでシステムのLLVMを使うようになりました。&lt;/p&gt;
 &lt;p&gt;ところで、私がgentoo-rustに関わりはじめた頃はシステムのLLVMを使うとブートストラップの初段で失敗していました。Rustが自前で当てていたLLVMのパッチが上流にすべて取り込まれたのは3.5以降ということもあって、システムのLLVMでビルドするというのは最近まで難しいことでした。また、今でもバンドルされたLLVMを使う方がrustc開発者の間でも主流ではないかと思います。&lt;/p&gt;
 &lt;p&gt;現在、私が追っているバグのひとつは次のコードをシステムのLLVMとリンクしたrustcでコンパイルするとリンクに失敗するというものです。&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;fn main() {
-    unsafe {
-        assume(1u == 1u);
-    }
-}
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;use&lt;/span&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;intrinsics&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;assume&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+
+&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="k"&gt;unsafe&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+        &lt;span class="n"&gt;assume&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="k"&gt;u&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="m"&gt;1&lt;/span&gt;&lt;span class="k"&gt;u&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;std::intrinsicsというのはコンパイラ内部の組み込み命令を含むモジュールで、LLVM周りの変更でいかにもおかしくなりそうだと思ってテストしたらその通りでした。&lt;/p&gt;
 &lt;p&gt;問題の箇所が絞り込めてからバグ報告しようかと思っていたのですが、忘れると良くないので今週末に報告しておきます。&lt;/p&gt;
