@@ -5,7 +5,7 @@
   {% endif %}
   <li>Page {{ articles_page.number }} / {{ articles_paginator.num_pages }}</li>
   {% if articles_page.has_next() %}
-  <li><a href='{{ SITEURL }}/{{ articles_next_page.url }}' rel='prev' title='Next page'>&Next &raquo;</a></li>
+  <li><a href='{{ SITEURL }}/{{ articles_next_page.url }}' rel='prev' title='Next page'>Next &raquo;</a></li>
   {% endif %}
 </ul>
 {% endif %}
