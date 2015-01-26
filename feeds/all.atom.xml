@@ -3,7 +3,7 @@
 &lt;div class="section" id="id1"&gt;
 &lt;h2&gt;入れ方&lt;/h2&gt;
 &lt;pre class="literal-block"&gt;
-# echo 'sys-devel/icecream ~*' &amp;gt;&amp;gt; /etc/portage/package_accept_keywords
+# echo 'sys-devel/icecream ~*' &amp;gt;&amp;gt; /etc/portage/package.accept_keywords
 # emerge sys-devel/icecream
 &lt;/pre&gt;
 &lt;/div&gt;
