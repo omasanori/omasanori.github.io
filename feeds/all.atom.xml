@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Brackets Salad</title><link href="http://omasanori.github.io/" rel="alternate"></link><link href="http://omasanori.github.io/feeds/all.atom.xml" rel="self"></link><id>http://omasanori.github.io/</id><updated>2015-01-26T19:26:00+09:00</updated><entry><title>先週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/26/what-i-did-2015w04/" rel="alternate"></link><updated>2015-01-26T19:26:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-26:blog/2015/01/26/what-i-did-2015w04/</id><summary type="html">&lt;p&gt;先週は開発ボードを弄っていた。ARM上でまともにプログラムを書くのは初めてなので慣れないところもあるが、何とかなりそうな気がしている。&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Brackets Salad</title><link href="http://omasanori.github.io/" rel="alternate"></link><link href="http://omasanori.github.io/feeds/all.atom.xml" rel="self"></link><id>http://omasanori.github.io/</id><updated>2015-01-26T19:43:00+09:00</updated><entry><title>Icecreamの使い方メモ</title><link href="http://omasanori.github.io/blog/2015/01/26/how-to-use-icecream/" rel="alternate"></link><updated>2015-01-26T19:43:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-26:blog/2015/01/26/how-to-use-icecream/</id><summary type="html">&lt;p&gt;とりあえずメモ程度。クロスコンパイルやってから整理する。&lt;/p&gt;
+&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;入れ方&lt;/h2&gt;
+&lt;pre class="literal-block"&gt;
+# echo 'sys-devel/icecream ~*' &amp;gt;&amp;gt; /etc/portage/package_accept_keywords
+# emerge sys-devel/icecream
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;使い方&lt;/h2&gt;
+&lt;p&gt;/usr/libexec/icecc/binにPATHを通す。Portageでのみ使う場合はmake.confのPREROOTPATHに書けばいい。&lt;/p&gt;
+&lt;p&gt;ただし、PortageはCHOST込みの名前（例えばx86_64-pc-linux-gnu-gcc）でコンパイラを呼び出す。よって、先ほどの位置にそれらの名前で/usr/bin/iceccへのシンボリックリンクを置く。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id3"&gt;
+&lt;h2&gt;クロスコンパイル&lt;/h2&gt;
+&lt;p&gt;Portageでのみ使う場合はクロスコンパイラさえ配置してあれば先ほどの作業で問題なく動作するはず。今週試す。&lt;/p&gt;
+&lt;p&gt;Portage以外でも使う場合は先ほどとは逆に「単なるgccをCHOST付きの名前に置き換えてicecc越しに実行する」という細工をしないと各々のホストコンパイラでコンパイルしてリンク時にエラーを引き起こす。Gentoo Wikiのdistcc関連文書にうまいことやる方法が書かれているのでうまくやる。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id4"&gt;
+&lt;h2&gt;問題&lt;/h2&gt;
+&lt;p&gt;初回起動時にiceccdが死んでる問題があるがrestartするとうまくいく。これのおかげでIcecreamだけは手動で起動するようにしている。&lt;/p&gt;
+&lt;/div&gt;
+</summary></entry><entry><title>先週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/26/what-i-did-2015w04/" rel="alternate"></link><updated>2015-01-26T19:26:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-26:blog/2015/01/26/what-i-did-2015w04/</id><summary type="html">&lt;p&gt;先週は開発ボードを弄っていた。ARM上でまともにプログラムを書くのは初めてなので慣れないところもあるが、何とかなりそうな気がしている。&lt;/p&gt;
 &lt;p&gt;分散コンパイル環境はようやくクロスコンパイルに挑戦しようというところ。&lt;/p&gt;
 </summary></entry><entry><title>先週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/19/what-i-did-2015w03/" rel="alternate"></link><updated>2015-01-19T23:27:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-19:blog/2015/01/19/what-i-did-2015w03/</id><summary type="html">&lt;p&gt;先週は主にサーバのセットアップをやっていた。そろそろ開発ボード上で実験したいところ。&lt;/p&gt;
 &lt;p&gt;また、分散コンパイル環境に興味が沸いたので、&lt;a class="reference external" href="http://en.opensuse.org/Icecream"&gt;Icecream&lt;/a&gt;をセットアップした。まだ少し妙なところはあるけれど、そこそこ動く。&lt;/p&gt;

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang='ja'>
+  <head>
+    <meta charset='utf-8'>
+    <title>Icecreamの使い方メモ | Brackets Salad</title>
+    <link href='http://omasanori.github.io/styles/normalize.css' rel='stylesheet'>
+    <link href='http://omasanori.github.io/styles/main.css' rel='stylesheet'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<link href='http://omasanori.github.io/feeds/all.atom.xml' type='application/atom+xml' rel='alternate' title='Brackets Salad: All Articles (Atom)'>
+  </head>
+  <body>
+    <header>
+      <h1><a href='http://omasanori.github.io' rel='home'>Brackets Salad</a></h1>
+    </header>
+    <main>
+<header>
+  <time datetime='2015-01-26T19:43:00+09:00'>2015-01-26</time>
+  <h2><a href='http://omasanori.github.io/blog/2015/01/26/how-to-use-icecream/' rel='Permalink to Icecreamの使い方メモ'>Icecreamの使い方メモ</a></h2>
+</header>
+<p>とりあえずメモ程度。クロスコンパイルやってから整理する。</p>
+<div class="section" id="id1">
+<h2>入れ方</h2>
+<pre class="literal-block">
+# echo 'sys-devel/icecream ~*' &gt;&gt; /etc/portage/package_accept_keywords
+# emerge sys-devel/icecream
+</pre>
+</div>
+<div class="section" id="id2">
+<h2>使い方</h2>
+<p>/usr/libexec/icecc/binにPATHを通す。Portageでのみ使う場合はmake.confのPREROOTPATHに書けばいい。</p>
+<p>ただし、PortageはCHOST込みの名前（例えばx86_64-pc-linux-gnu-gcc）でコンパイラを呼び出す。よって、先ほどの位置にそれらの名前で/usr/bin/iceccへのシンボリックリンクを置く。</p>
+</div>
+<div class="section" id="id3">
+<h2>クロスコンパイル</h2>
+<p>Portageでのみ使う場合はクロスコンパイラさえ配置してあれば先ほどの作業で問題なく動作するはず。今週試す。</p>
+<p>Portage以外でも使う場合は先ほどとは逆に「単なるgccをCHOST付きの名前に置き換えてicecc越しに実行する」という細工をしないと各々のホストコンパイラでコンパイルしてリンク時にエラーを引き起こす。Gentoo Wikiのdistcc関連文書にうまいことやる方法が書かれているのでうまくやる。</p>
+</div>
+<div class="section" id="id4">
+<h2>問題</h2>
+<p>初回起動時にiceccdが死んでる問題があるがrestartするとうまくいく。これのおかげでIcecreamだけは手動で起動するようにしている。</p>
+</div>
+
+    </main>
+  </body>
+</html>
