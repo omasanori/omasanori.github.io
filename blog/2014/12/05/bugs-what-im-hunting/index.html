@@ -7,7 +7,7 @@
         <link href="http://omasanori.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Brackets Salad Atom Feed" />
 
         <!--[if IE]>
-            <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <![endif]-->
 </head>
 
@@ -35,7 +35,7 @@
         <address class="vcard author">
                 By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
         </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>. </p>
+<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
 
 </footer><!-- /.post-info -->      <p>これは <a class="reference external" href="http://www.adventar.org/calendars/462">Rust Language Advent Calendar 2014</a> の5日目の記事です。</p>
 <p>……が、当初考えていたものを書きあげられませんでした。見切り発車で2回目の登録をしてすみません。</p>
@@ -58,7 +58,7 @@
 <p>Gentoo Linuxでは別の問題もあります。（バイナリパッケージではなく）ソースコードからビルドするパッケージでは、システムのライブラリを使う場合に比べてバンドルされたライブラリを使う場合はビルド時間が伸びることになります。負荷をかけてハードウェアやカーネルのバグを探したい場合や他に暖房器具がない場合を除けば、ビルド時間が短くて困ることはあまりありません。そういうわけで、gentoo-rustのdev-lang/rustパッケージはデフォルトでシステムのLLVMを使うようになりました。</p>
 <p>ところで、私がgentoo-rustに関わりはじめた頃はシステムのLLVMを使うとブートストラップの初段で失敗していました。Rustが自前で当てていたLLVMのパッチが上流にすべて取り込まれたのは3.5以降ということもあって、システムのLLVMでビルドするというのは最近まで難しいことでした。また、今でもバンドルされたLLVMを使う方がrustc開発者の間でも主流ではないかと思います。</p>
 <p>現在、私が追っているバグのひとつは次のコードをシステムのLLVMとリンクしたrustcでコンパイルするとリンクに失敗するというものです。</p>
-<div class="highlight"><pre><span class="kn">use</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">intrinsics</span><span class="o">::</span><span class="n">assume</span><span class="p">;</span><span class="w"></span>
+<div class="highlight"><pre><span></span><span class="kn">use</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">intrinsics</span><span class="o">::</span><span class="n">assume</span><span class="p">;</span><span class="w"></span>
 
 <span class="k">fn</span><span class="w"> </span><span class="n">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>

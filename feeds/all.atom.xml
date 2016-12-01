@@ -1,5 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Brackets Salad</title><link href="http://omasanori.github.io/" rel="alternate"></link><link href="http://omasanori.github.io/feeds/all.atom.xml" rel="self"></link><id>http://omasanori.github.io/</id><updated>2015-01-26T19:43:00+09:00</updated><entry><title>Icecreamの使い方メモ</title><link href="http://omasanori.github.io/blog/2015/01/26/how-to-use-icecream/" rel="alternate"></link><updated>2015-01-26T19:43:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-26:blog/2015/01/26/how-to-use-icecream/</id><summary type="html">&lt;p&gt;とりあえずメモ程度。クロスコンパイルやってから整理する。&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Brackets Salad</title><link href="http://omasanori.github.io/" rel="alternate"></link><link href="http://omasanori.github.io/feeds/all.atom.xml" rel="self"></link><id>http://omasanori.github.io/</id><updated>2015-12-02T00:00:00+09:00</updated><entry><title>repos.confに関するtips</title><link href="http://omasanori.github.io/blog/2015/12/02/tips-on-repos-conf/" rel="alternate"></link><published>2015-12-02T00:00:00+09:00</published><updated>2015-12-02T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-12-02:blog/2015/12/02/tips-on-repos-conf/</id><summary type="html">&lt;p&gt;これは&lt;a class="reference external" href="http://www.adventar.org/calendars/1493"&gt;Gentoo Advent Calendar 2016&lt;/a&gt; 2日目に寄稿した文章です。&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://twitter.com/naota344/status/801896700470169600"&gt;Gentooは市民の義務&lt;/a&gt;、皆さんご存知ですね？&lt;/p&gt;
+&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;はじめに&lt;/h2&gt;
+&lt;p&gt;最近のPortageでoverlayを追加するときにはrepos.confという設定ファイルを書くことになっています。このrepos.confについての情報はGentoo Wikiのいくつかのページに分散しています。主な文書は次の3つです。&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Project:Portage/Sync"&gt;Project:Portage/Sync&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki//etc/portage/repos.conf"&gt;/etc/portage/repos.conf&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Overlay/Local_overlay"&gt;Overlay/Local overlay&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;この文章はこれらに書かれているrepos.confの機能からよく使うものを抜粋した覚書です。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="repos-conf"&gt;
+&lt;h2&gt;repos.confをはじめる&lt;/h2&gt;
+&lt;p&gt;最新のGentoo Handbookにはrepos.confを前提とした説明が掲載されているので、指示通りにやれば問題ありません。&lt;/p&gt;
+&lt;p&gt;まだrepos.confに移行していない古い環境がある場合は、Portageを更新してから/etc/portage/repos.confディレクトリを作り、その中に/usr/share/portage/config/repos.confを適当な名前でコピーすればとりあえず動きます。&lt;/p&gt;
+&lt;p&gt;更にlaymanを使っている場合は、バージョン2.3以降のlayman（現時点ではunstable）に新しい機構に対応するためのsync-plugin-portageというUSEフラグがあるので、これを有効にしてから/etc/layman/layman.cfgのconf_typeをrepos.confにし、layman-updater -Rした後でlaymanのmake.confを削除します。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="gentoo-treersyncwebrsync"&gt;
+&lt;h2&gt;Gentoo treeの同期方法をrsyncからwebrsyncに切り替える&lt;/h2&gt;
+&lt;p&gt;gentooリポジトリの設定部分でsync-typeをrsyncからwebrsyncに切り替えてsync-uriを削除すればemerge-webrsync相当の方法でGentoo treeを同期します。&lt;/p&gt;
+&lt;p&gt;webrsyncでダウンロードしてきたebuildツリーのアーカイブはOpenPGP鍵で署名されており、それを検証できるのがwebrsync方式の大きな利点ですが、検証のためには追加の手順が必要です。&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Handbook:Parts/Working/Features"&gt;Gentoo HandbookのFeatures&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="gentoo-treersyncgit"&gt;
+&lt;h2&gt;Gentoo treeの同期方法をrsyncからgitに切り替える&lt;/h2&gt;
+&lt;p&gt;gentooリポジトリの設定部分でsync-typeをrsyncからgitに切り替えてsync-uriを適当なリポジトリに変更すればGitでGentoo treeを同期します。&lt;/p&gt;
+&lt;p&gt;が、これはむしろ他のoverlayを使うときによく使っている気もします。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="overlay"&gt;
+&lt;h2&gt;新しいoverlayを追加する&lt;/h2&gt;
+&lt;p&gt;たとえばRust overlayを使いたくなったとき、laymanをインストールしていればいつも通りlayman -a rustすれば使えるようになりますが、laymanを使っていない場合は/etc/portage/repos.conf/rust.confで次のように書きます。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[rust]
+location = /usr/local/overlay/rust
+sync-type = git
+sync-uri = https://github.com/gentoo/gentoo-rust.git
+&lt;/pre&gt;
+&lt;p&gt;その後でsyncすれば使えるようになります。他のoverlayでも、どこにあってどの方法で同期するかによってsync-typeとsync-uriを調整すれば同じ手順で使えます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="crossdev"&gt;
+&lt;h2&gt;crossdevを使う&lt;/h2&gt;
+&lt;p&gt;Gentooにはクロスツールチェーンをインストールするのに便利なcrossdevというツールがあります。crossdevはtripletごとにカテゴリを作ってebuildをそこにコピーするので、専用のoverlayが必要になります。それは次のような手順で作ります。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# mkdir -p /usr/local/overlay/crossdev/{profiles,metadata}
+# echo 'crossdev' &amp;gt; /usr/local/overlay/crossdev/profiles/repo_name
+# echo &amp;lt;&amp;lt; EOF &amp;gt; /usr/local/overlay/crossdev/metadata/layout.conf
+masters = gentoo
+thin-manifests = true
+EOF
+# echo &amp;lt;&amp;lt; EOF &amp;gt; /etc/portage/repos.conf/crossdev.conf
+[crossdev]
+location = /usr/local/overlay/crossdev
+masters = gentoo
+priority = 10
+auto-sync = no
+EOF
+# chown -R portage:portage /usr/local/overlay/crossdev
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;おわりに&lt;/h2&gt;
+&lt;p&gt;overlayごとに/etc/portage/repos.conf以下にファイルを置けばうまくやってくれる今の仕組みは私好みでいいなぁと思っています。&lt;/p&gt;
+&lt;p&gt;Happy emerging!&lt;/p&gt;
+&lt;/div&gt;
+</summary></entry><entry><title>Icecreamの使い方メモ</title><link href="http://omasanori.github.io/blog/2015/01/26/how-to-use-icecream/" rel="alternate"></link><published>2015-01-26T19:43:00+09:00</published><updated>2015-01-26T19:43:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-26:blog/2015/01/26/how-to-use-icecream/</id><summary type="html">&lt;p&gt;とりあえずメモ程度。クロスコンパイルやってから整理する。&lt;/p&gt;
 &lt;div class="section" id="id1"&gt;
 &lt;h2&gt;入れ方&lt;/h2&gt;
 &lt;pre class="literal-block"&gt;
@@ -21,14 +85,14 @@
 &lt;h2&gt;問題&lt;/h2&gt;
 &lt;p&gt;初回起動時にiceccdが死んでる問題があるがrestartするとうまくいく。これのおかげでIcecreamだけは手動で起動するようにしている。&lt;/p&gt;
 &lt;/div&gt;
-</summary></entry><entry><title>先週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/26/what-i-did-2015w04/" rel="alternate"></link><updated>2015-01-26T19:26:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-26:blog/2015/01/26/what-i-did-2015w04/</id><summary type="html">&lt;p&gt;先週は開発ボードを弄っていた。ARM上でまともにプログラムを書くのは初めてなので慣れないところもあるが、何とかなりそうな気がしている。&lt;/p&gt;
+</summary></entry><entry><title>先週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/26/what-i-did-2015w04/" rel="alternate"></link><published>2015-01-26T19:26:00+09:00</published><updated>2015-01-26T19:26:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-26:blog/2015/01/26/what-i-did-2015w04/</id><summary type="html">&lt;p&gt;先週は開発ボードを弄っていた。ARM上でまともにプログラムを書くのは初めてなので慣れないところもあるが、何とかなりそうな気がしている。&lt;/p&gt;
 &lt;p&gt;分散コンパイル環境はようやくクロスコンパイルに挑戦しようというところ。&lt;/p&gt;
-</summary></entry><entry><title>先週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/19/what-i-did-2015w03/" rel="alternate"></link><updated>2015-01-19T23:27:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-19:blog/2015/01/19/what-i-did-2015w03/</id><summary type="html">&lt;p&gt;先週は主にサーバのセットアップをやっていた。そろそろ開発ボード上で実験したいところ。&lt;/p&gt;
+</summary></entry><entry><title>先週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/19/what-i-did-2015w03/" rel="alternate"></link><published>2015-01-19T23:27:00+09:00</published><updated>2015-01-19T23:27:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-19:blog/2015/01/19/what-i-did-2015w03/</id><summary type="html">&lt;p&gt;先週は主にサーバのセットアップをやっていた。そろそろ開発ボード上で実験したいところ。&lt;/p&gt;
 &lt;p&gt;また、分散コンパイル環境に興味が沸いたので、&lt;a class="reference external" href="http://en.opensuse.org/Icecream"&gt;Icecream&lt;/a&gt;をセットアップした。まだ少し妙なところはあるけれど、そこそこ動く。&lt;/p&gt;
-</summary></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/11/what-i-did-2015w02/" rel="alternate"></link><updated>2015-01-11T21:51:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-11:blog/2015/01/11/what-i-did-2015w02/</id><summary type="html">&lt;p&gt;今週は実家から自宅に戻ってきて、受講とサーバ構築で少しずつ感覚を休暇前に戻していた。いくつかバグ報告もした。&lt;/p&gt;
+</summary></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/11/what-i-did-2015w02/" rel="alternate"></link><published>2015-01-11T21:51:00+09:00</published><updated>2015-01-11T21:51:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-11:blog/2015/01/11/what-i-did-2015w02/</id><summary type="html">&lt;p&gt;今週は実家から自宅に戻ってきて、受講とサーバ構築で少しずつ感覚を休暇前に戻していた。いくつかバグ報告もした。&lt;/p&gt;
 &lt;p&gt;以前はRubyよりもPythonを好んでいたのでRubyはあまり書かなかったけど、そういう好き嫌いは減らしていこうと思っている。タイミングよくネタがあったので、週末にちょっとしたコードをRubyで書いた。&lt;/p&gt;
 &lt;p&gt;この文章を書き始める少し前まで、1月12日が休みだと気づいていなかった。何をしようか。&lt;/p&gt;
-</summary></entry><entry><title>最近私が追っているバグなどの話</title><link href="http://omasanori.github.io/blog/2014/12/05/bugs-what-im-hunting/" rel="alternate"></link><updated>2014-12-05T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-12-05:blog/2014/12/05/bugs-what-im-hunting/</id><summary type="html">&lt;p&gt;これは &lt;a class="reference external" href="http://www.adventar.org/calendars/462"&gt;Rust Language Advent Calendar 2014&lt;/a&gt; の5日目の記事です。&lt;/p&gt;
+</summary></entry><entry><title>最近私が追っているバグなどの話</title><link href="http://omasanori.github.io/blog/2014/12/05/bugs-what-im-hunting/" rel="alternate"></link><published>2014-12-05T00:00:00+09:00</published><updated>2014-12-05T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-12-05:blog/2014/12/05/bugs-what-im-hunting/</id><summary type="html">&lt;p&gt;これは &lt;a class="reference external" href="http://www.adventar.org/calendars/462"&gt;Rust Language Advent Calendar 2014&lt;/a&gt; の5日目の記事です。&lt;/p&gt;
 &lt;p&gt;……が、当初考えていたものを書きあげられませんでした。見切り発車で2回目の登録をしてすみません。&lt;/p&gt;
 &lt;p&gt;とはいえ、登録した以上は何かしら書こうと思い、gentoo-rust関連で私が追っているバグについての話を少々。&lt;/p&gt;
 &lt;div class="section" id="gentoo-rust"&gt;
@@ -49,7 +113,7 @@
 &lt;p&gt;Gentoo Linuxでは別の問題もあります。（バイナリパッケージではなく）ソースコードからビルドするパッケージでは、システムのライブラリを使う場合に比べてバンドルされたライブラリを使う場合はビルド時間が伸びることになります。負荷をかけてハードウェアやカーネルのバグを探したい場合や他に暖房器具がない場合を除けば、ビルド時間が短くて困ることはあまりありません。そういうわけで、gentoo-rustのdev-lang/rustパッケージはデフォルトでシステムのLLVMを使うようになりました。&lt;/p&gt;
 &lt;p&gt;ところで、私がgentoo-rustに関わりはじめた頃はシステムのLLVMを使うとブートストラップの初段で失敗していました。Rustが自前で当てていたLLVMのパッチが上流にすべて取り込まれたのは3.5以降ということもあって、システムのLLVMでビルドするというのは最近まで難しいことでした。また、今でもバンドルされたLLVMを使う方がrustc開発者の間でも主流ではないかと思います。&lt;/p&gt;
 &lt;p&gt;現在、私が追っているバグのひとつは次のコードをシステムのLLVMとリンクしたrustcでコンパイルするとリンクに失敗するというものです。&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="kn"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;intrinsics&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;assume&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="kn"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;intrinsics&lt;/span&gt;&lt;span class="o"&gt;::&lt;/span&gt;&lt;span class="n"&gt;assume&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 
 &lt;span class="k"&gt;fn&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
 &lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;unsafe&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
@@ -81,7 +145,7 @@
 &lt;p&gt;次回から脱稿の目処が立ってから担当に名乗りを上げます。すみませんでした。&lt;/p&gt;
 &lt;p&gt;明日は&lt;a class="reference external" href="https://twitter.com/nida_001"&gt;&amp;#64;nida_001&lt;/a&gt;さんの予定です。&lt;/p&gt;
 &lt;/div&gt;
-</summary></entry><entry><title>なぜRustの人はlifetimeとownershipについて話すのか</title><link href="http://omasanori.github.io/blog/2014/12/02/ownership-and-lifetime/" rel="alternate"></link><updated>2014-12-02T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-12-02:blog/2014/12/02/ownership-and-lifetime/</id><summary type="html">&lt;p&gt;これは &lt;a class="reference external" href="http://www.adventar.org/calendars/462"&gt;Rust Language Advent Calendar 2014&lt;/a&gt; の2日目の記事です。前日は &lt;a class="reference external" href="https://twitter.com/saneyuki_s"&gt;&amp;#64;saneyuki_s&lt;/a&gt; さんの『&lt;a class="reference external" href="http://saneyukis.hatenablog.com/entry/2014/12/01/034929"&gt;Rustプログラミングにおけるデバッグ入門&lt;/a&gt;』でした。&lt;/p&gt;
+</summary></entry><entry><title>なぜRustの人はlifetimeとownershipについて話すのか</title><link href="http://omasanori.github.io/blog/2014/12/02/ownership-and-lifetime/" rel="alternate"></link><published>2014-12-02T00:00:00+09:00</published><updated>2014-12-02T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-12-02:blog/2014/12/02/ownership-and-lifetime/</id><summary type="html">&lt;p&gt;これは &lt;a class="reference external" href="http://www.adventar.org/calendars/462"&gt;Rust Language Advent Calendar 2014&lt;/a&gt; の2日目の記事です。前日は &lt;a class="reference external" href="https://twitter.com/saneyuki_s"&gt;&amp;#64;saneyuki_s&lt;/a&gt; さんの『&lt;a class="reference external" href="http://saneyukis.hatenablog.com/entry/2014/12/01/034929"&gt;Rustプログラミングにおけるデバッグ入門&lt;/a&gt;』でした。&lt;/p&gt;
 &lt;p&gt;今日はlifetimeとownershipの話です。「なんだそれは」と思った方も、「またか」と思った方も、「Rust使ってるからよく知ってるよ」と思った方も少しの間お付き合いください。&lt;/p&gt;
 &lt;div class="section" id="id1"&gt;
 &lt;h2&gt;はじめに&lt;/h2&gt;
@@ -119,7 +183,7 @@
 &lt;h2&gt;おわりに&lt;/h2&gt;
 &lt;p&gt;この記事は、かつてRustについて発表する機会を頂いた際にlifetimeとownershipについてうまく発表できなかったことがきっかけで書かれました。あなたがRustに興味を持つきっかけ、あるいは何か新しいアイデアを得る助けになれば幸いです。&lt;/p&gt;
 &lt;/div&gt;
-</summary></entry><entry><title>revdep-rebuildでlibstdc++.so.*に依存したバイナリを探す方法</title><link href="http://omasanori.github.io/blog/2014/11/09/revdep-rebuild-libstdcxx/" rel="alternate"></link><updated>2014-11-09T18:59:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-11-09:blog/2014/11/09/revdep-rebuild-libstdcxx/</id><summary type="html">&lt;p&gt;Gentoo Linuxでlibstdc++.so.6に依存したバイナリを含むパッケージをまとめてリビルドしたい場合はrevdep-rebuildが利用できる。しかし、次のコマンドは意図したように動作しない。:&lt;/p&gt;
+</summary></entry><entry><title>revdep-rebuildでlibstdc++.so.*に依存したバイナリを探す方法</title><link href="http://omasanori.github.io/blog/2014/11/09/revdep-rebuild-libstdcxx/" rel="alternate"></link><published>2014-11-09T18:59:00+09:00</published><updated>2014-11-09T18:59:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-11-09:blog/2014/11/09/revdep-rebuild-libstdcxx/</id><summary type="html">&lt;p&gt;Gentoo Linuxでlibstdc++.so.6に依存したバイナリを含むパッケージをまとめてリビルドしたい場合はrevdep-rebuildが利用できる。しかし、次のコマンドは意図したように動作しない。:&lt;/p&gt;
 &lt;pre class="literal-block"&gt;
 revdep-rebuild -L libstdc++.so.6
 &lt;/pre&gt;
@@ -128,19 +192,19 @@ revdep-rebuild -L libstdc++.so.6
 revdep-rebuild -L 'libstdc\+\+.so.6'
 &lt;/pre&gt;
 &lt;p&gt;libstdc++のABI非互換によって問題が起きたと思しき場合の応急処置として必要となったのでメモ。&lt;/p&gt;
-</summary></entry><entry><title>Crossdevを使ってarm-none-eabiのツールチェインを用意する</title><link href="http://omasanori.github.io/blog/2014/07/02/crossdev-arm-none-eabi/" rel="alternate"></link><updated>2014-07-02T17:50:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-07-02:blog/2014/07/02/crossdev-arm-none-eabi/</id><summary type="html">&lt;pre class="literal-block"&gt;
+</summary></entry><entry><title>Crossdevを使ってarm-none-eabiのツールチェインを用意する</title><link href="http://omasanori.github.io/blog/2014/07/02/crossdev-arm-none-eabi/" rel="alternate"></link><published>2014-07-02T17:50:00+09:00</published><updated>2014-07-02T17:50:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-07-02:blog/2014/07/02/crossdev-arm-none-eabi/</id><summary type="html">&lt;pre class="literal-block"&gt;
 $ crossdev -s4 --without-headers -t arm-none-eabi
 &lt;/pre&gt;
 &lt;p&gt;これだけでC・C++・Fortranのフロントエンドが用意される。楽。&lt;/p&gt;
 &lt;p&gt;このくらいの覚書でも書くようにしないと私はブログを日常的に書くことなどできないだろうということに今更気づいた。&lt;/p&gt;
-</summary></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2013/09/09/what-i-did-2013w36/" rel="alternate"></link><updated>2013-09-09T03:37:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-09-09:blog/2013/09/09/what-i-did-2013w36/</id><summary type="html">&lt;p&gt;今週はあまりコードを書かなかった。&lt;/p&gt;
+</summary></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2013/09/09/what-i-did-2013w36/" rel="alternate"></link><published>2013-09-09T03:37:00+09:00</published><updated>2013-09-09T03:37:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-09-09:blog/2013/09/09/what-i-did-2013w36/</id><summary type="html">&lt;p&gt;今週はあまりコードを書かなかった。&lt;/p&gt;
 &lt;p&gt;生活リズムを少しずつ戻していかないと……。&lt;/p&gt;
-</summary></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2013/09/01/what-i-did-2013w35/" rel="alternate"></link><updated>2013-09-01T08:32:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-09-01:blog/2013/09/01/what-i-did-2013w35/</id><summary type="html">&lt;p&gt;今週はOSS系の活動は控えて、学生としての活動に集中していた。&lt;/p&gt;
+</summary></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2013/09/01/what-i-did-2013w35/" rel="alternate"></link><published>2013-09-01T08:32:00+09:00</published><updated>2013-09-01T08:32:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-09-01:blog/2013/09/01/what-i-did-2013w35/</id><summary type="html">&lt;p&gt;今週はOSS系の活動は控えて、学生としての活動に集中していた。&lt;/p&gt;
 &lt;p&gt;来週は少しアウトプットできると思う。&lt;/p&gt;
-</summary></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2013/08/25/what-i-did-2013w34/" rel="alternate"></link><updated>2013-08-25T04:58:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-08-25:blog/2013/08/25/what-i-did-2013w34/</id><summary type="html">&lt;p&gt;今週は &lt;a class="reference external" href="https://github.com/omasanori/msgpack-rust"&gt;https://github.com/omasanori/msgpack-rust&lt;/a&gt; でMessagePack for Rustを書き始めた。基本的な型のエンコードはできるようになったので、この調子で進めていきたい。文字と文字列の扱いはまだ決めかねている。&lt;/p&gt;
+</summary></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2013/08/25/what-i-did-2013w34/" rel="alternate"></link><published>2013-08-25T04:58:00+09:00</published><updated>2013-08-25T04:58:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-08-25:blog/2013/08/25/what-i-did-2013w34/</id><summary type="html">&lt;p&gt;今週は &lt;a class="reference external" href="https://github.com/omasanori/msgpack-rust"&gt;https://github.com/omasanori/msgpack-rust&lt;/a&gt; でMessagePack for Rustを書き始めた。基本的な型のエンコードはできるようになったので、この調子で進めていきたい。文字と文字列の扱いはまだ決めかねている。&lt;/p&gt;
 &lt;p&gt;来週はあまり自由に時間を使えないので、MessagePack for Rustが進展するのは再来週のことになると思う。&lt;/p&gt;
 &lt;p&gt;Twitterに書いても問題ない長さだけど、せっかく使おうと決めたのでこちらに書く。&lt;/p&gt;
-</summary></entry><entry><title>Pelicanはじめました</title><link href="http://omasanori.github.io/blog/2013/08/17/hello/" rel="alternate"></link><updated>2013-08-17T10:18:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-08-17:blog/2013/08/17/hello/</id><summary type="html">&lt;p&gt;しばらくブログの類を書いていなかった。Twitterなどを使っていると、ブログの管理画面が冗長に感じて面倒くさくなったからだ。&lt;/p&gt;
+</summary></entry><entry><title>Pelicanはじめました</title><link href="http://omasanori.github.io/blog/2013/08/17/hello/" rel="alternate"></link><published>2013-08-17T10:18:00+09:00</published><updated>2013-08-17T10:18:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-08-17:blog/2013/08/17/hello/</id><summary type="html">&lt;p&gt;しばらくブログの類を書いていなかった。Twitterなどを使っていると、ブログの管理画面が冗長に感じて面倒くさくなったからだ。&lt;/p&gt;
 &lt;p&gt;しかし、Twitterは文章を書くハードルは低いが長文を書くようにデザインされたものでなく、Facebookのプライバシー設定は割と厳しくしていてプログラミングネタに興味のある友人も少ない&lt;a class="footnote-reference" href="#id4" id="id1"&gt;[1]&lt;/a&gt;。Google+は使い分けに迷って放置している。&lt;/p&gt;
 &lt;p&gt;結果、コード例を含むまとまった量の文章を書く場所を持たない状態が続いた。年末のアドベントカレンダーでは以前から使っていたはてなダイアリーに加えてQiitaとGistで書いたものの、やはり面倒だと思った。長い文章を書く時は、書く環境に制約が少なくブラウザを開かなくとも管理できる方が私の好みに合っていた。&lt;/p&gt;
 &lt;p&gt;GitHub Pagesを使おうと思ってOctopressをいじっていた&lt;a class="footnote-reference" href="#id5" id="id2"&gt;[2]&lt;/a&gt;が、今ひとつピンとこなかったので放置していた。今思うと、Octopressを使おうと決断できなかった原因の一つは私がRubyを使い慣れていないことだったのかもしれない。&lt;/p&gt;
