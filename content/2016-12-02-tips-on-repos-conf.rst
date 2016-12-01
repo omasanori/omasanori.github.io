@@ -1,7 +1,7 @@
 repos.confに関するtips
 ======================
 
-:date: 2015-12-02 00:00
+:date: 2016-12-02 00:00
 :slug: tips-on-repos-conf
 :lang: ja
 :summary: repos.confについての簡単なまとめ
