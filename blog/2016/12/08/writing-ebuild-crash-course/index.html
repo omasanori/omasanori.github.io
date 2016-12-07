@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
         <meta charset="utf-8" />
-        <title>Brackets Salad - Masanori Ogino</title>
+        <title>書ける！ebuild</title>
         <link rel="stylesheet" href="http://omasanori.github.io/theme/css/main.css" />
         <link href="http://omasanori.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Brackets Salad Atom Feed" />
 
@@ -15,13 +15,18 @@
         <header id="banner" class="body">
                 <h1><a href="http://omasanori.github.io/">Brackets Salad </a></h1>
                 <nav><ul>
-                    <li><a href="http://omasanori.github.io/blog/category/misc/">misc</a></li>
+                    <li class="active"><a href="http://omasanori.github.io/blog/category/misc/">misc</a></li>
                 </ul></nav>
         </header><!-- /#banner -->
+<section id="content" class="body">
+  <article>
+    <header>
+      <h1 class="entry-title">
+        <a href="http://omasanori.github.io/blog/2016/12/08/writing-ebuild-crash-course/" rel="bookmark"
+           title="Permalink to 書ける！ebuild">書ける！ebuild</a></h1>
+    </header>
 
-            <aside id="featured" class="body">
-                <article>
-                    <h1 class="entry-title"><a href="http://omasanori.github.io/blog/2016/12/08/writing-ebuild-crash-course/">書ける！ebuild</a></h1>
+    <div class="entry-content">
 <footer class="post-info">
         <abbr class="published" title="2016-12-08T01:00:00+09:00">
                 Published: 2016-12-08
@@ -32,7 +37,7 @@
         </address>
 <p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
 
-</footer><!-- /.post-info --><p>これは<a class="reference external" href="http://www.adventar.org/calendars/1493">Gentoo Advent Calendar 2016</a> 7日目に遅刻した文章です。</p>
+</footer><!-- /.post-info -->      <p>これは<a class="reference external" href="http://www.adventar.org/calendars/1493">Gentoo Advent Calendar 2016</a> 7日目に遅刻した文章です。</p>
 <div class="section" id="id1">
 <h2>はじめに</h2>
 <p>Gentoo Linuxに限らず、Linuxディストリビューションの多くにはパッケージマネージャというアプリケーションがインストールされており、システムの構成を管理することができます。一度それに慣れてしまうと、一つ一つ自分でビルドしてインストールし、不都合が起きたら調整してから再度インストールするという原始的な管理方法は次第に苦痛になり、統一的なインターフェースでシステムを組み替えられる日々を謳歌し、そして壁に突き当たります。すなわち、欲しいソフトウェアをパッケージマネージャでインストールできないという壁に。</p>
@@ -248,225 +253,11 @@ $(use_enable toolbar) \
 <p>もし便利なebuildが書けたら、GitHubなどで自分のローカルオーバレイを公開するのも良いでしょう。また、Gentooリポジトリにあるebuildを修正した場合は、Gentooリポジトリに取り込んでもらうべく<a class="reference external" href="https://bugs.gentoo.org/">GentooのBugzilla</a>への報告や<a class="reference external" href="https://github.com/gentoo/gentoo">GitHubミラー</a>へのプルリクエストをぜひ検討してみてください。</p>
 <p>この文書を読む前よりもebuildを身近に感じられますように。</p>
 </div>
-                </article>
-            </aside><!-- /#featured -->
-                <section id="content" class="body">
-                    <h1>Other articles</h1>
-                    <hr />
-                    <ol id="posts-list" class="hfeed">
 
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="http://omasanori.github.io/blog/2016/12/02/tips-on-repos-conf/" rel="bookmark"
-                           title="Permalink to repos.confに関するtips">repos.confに関するtips</a></h1>
-                </header>
+    </div><!-- /.entry-content -->
 
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2016-12-02T00:00:00+09:00">
-                Published: 2016-12-02
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
-        </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p class="first last">repos.confについての簡単なまとめ</p>
-
-                <a class="readmore" href="http://omasanori.github.io/blog/2016/12/02/tips-on-repos-conf/">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="http://omasanori.github.io/blog/2015/01/26/how-to-use-icecream/" rel="bookmark"
-                           title="Permalink to Icecreamの使い方メモ">Icecreamの使い方メモ</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2015-01-26T19:43:00+09:00">
-                Published: 2015-01-26
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
-        </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p class="first last">Icecream (icecc) の使い方についてメモしておいた。</p>
-
-                <a class="readmore" href="http://omasanori.github.io/blog/2015/01/26/how-to-use-icecream/">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="http://omasanori.github.io/blog/2015/01/26/what-i-did-2015w04/" rel="bookmark"
-                           title="Permalink to 先週やったこと">先週やったこと</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2015-01-26T19:26:00+09:00">
-                Published: 2015-01-26
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
-        </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p class="first last">先週を振り返った。</p>
-
-                <a class="readmore" href="http://omasanori.github.io/blog/2015/01/26/what-i-did-2015w04/">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="http://omasanori.github.io/blog/2015/01/19/what-i-did-2015w03/" rel="bookmark"
-                           title="Permalink to 先週やったこと">先週やったこと</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2015-01-19T23:27:00+09:00">
-                Published: 2015-01-19
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
-        </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p class="first last">月曜になったけど、先週を振り返った。</p>
-
-                <a class="readmore" href="http://omasanori.github.io/blog/2015/01/19/what-i-did-2015w03/">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="http://omasanori.github.io/blog/2015/01/11/what-i-did-2015w02/" rel="bookmark"
-                           title="Permalink to 今週やったこと">今週やったこと</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2015-01-11T21:51:00+09:00">
-                Published: 2015-01-11
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
-        </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p class="first last">久々に今週を振り返った。</p>
-
-                <a class="readmore" href="http://omasanori.github.io/blog/2015/01/11/what-i-did-2015w02/">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="http://omasanori.github.io/blog/2014/12/05/bugs-what-im-hunting/" rel="bookmark"
-                           title="Permalink to 最近私が追っているバグなどの話">最近私が追っているバグなどの話</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2014-12-05T00:00:00+09:00">
-                Published: 2014-12-05
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
-        </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p class="first last">ネタが浮かばなかったので最近追っているバグについて書いた。</p>
-
-                <a class="readmore" href="http://omasanori.github.io/blog/2014/12/05/bugs-what-im-hunting/">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="http://omasanori.github.io/blog/2014/12/02/ownership-and-lifetime/" rel="bookmark"
-                           title="Permalink to なぜRustの人はlifetimeとownershipについて話すのか">なぜRustの人はlifetimeとownershipについて話すのか</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2014-12-02T00:00:00+09:00">
-                Published: 2014-12-02
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
-        </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p class="first last">lifetimeとownershipについて振り返ってみる。</p>
-
-                <a class="readmore" href="http://omasanori.github.io/blog/2014/12/02/ownership-and-lifetime/">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="http://omasanori.github.io/blog/2014/11/09/revdep-rebuild-libstdcxx/" rel="bookmark"
-                           title="Permalink to revdep-rebuildでlibstdc++.so.*に依存したバイナリを探す方法">revdep-rebuildでlibstdc++.so.*に依存したバイナリを探す方法</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2014-11-09T18:59:00+09:00">
-                Published: 2014-11-09
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
-        </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p class="first last">revdep-rebuild -L &lt;ライブラリ名&gt;の&lt;ライブラリ名&gt;は正規表現として解釈される。</p>
-
-                <a class="readmore" href="http://omasanori.github.io/blog/2014/11/09/revdep-rebuild-libstdcxx/">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-
-            <li><article class="hentry">
-                <header>
-                    <h1><a href="http://omasanori.github.io/blog/2014/07/02/crossdev-arm-none-eabi/" rel="bookmark"
-                           title="Permalink to Crossdevを使ってarm-none-eabiのツールチェインを用意する">Crossdevを使ってarm-none-eabiのツールチェインを用意する</a></h1>
-                </header>
-
-                <div class="entry-content">
-<footer class="post-info">
-        <abbr class="published" title="2014-07-02T17:50:00+09:00">
-                Published: 2014-07-02
-        </abbr>
-
-        <address class="vcard author">
-                By                         <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
-        </address>
-<p>In <a href="http://omasanori.github.io/blog/category/misc/">misc</a>.</p>
-
-</footer><!-- /.post-info -->                <p class="first last">ARM用のツールチェインが欲しくなったのでcrossdevで用意した。</p>
-
-                <a class="readmore" href="http://omasanori.github.io/blog/2014/07/02/crossdev-arm-none-eabi/">read more</a>
-                </div><!-- /.entry-content -->
-            </article></li>
-                </ol><!-- /#posts-list -->
-<p class="paginator">
-    Page 1 / 2
-        <a href="http://omasanori.github.io/blog/author/masanori-ogino/index2.html">&raquo;</a>
-</p>
-                </section><!-- /#content -->
+  </article>
+</section>
         <section id="extras" class="body">
                 <div class="social">
                         <h2>social</h2>

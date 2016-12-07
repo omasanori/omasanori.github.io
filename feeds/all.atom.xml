@@ -1,5 +1,221 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Brackets Salad</title><link href="http://omasanori.github.io/" rel="alternate"></link><link href="http://omasanori.github.io/feeds/all.atom.xml" rel="self"></link><id>http://omasanori.github.io/</id><updated>2016-12-02T00:00:00+09:00</updated><entry><title>repos.confに関するtips</title><link href="http://omasanori.github.io/blog/2016/12/02/tips-on-repos-conf/" rel="alternate"></link><published>2016-12-02T00:00:00+09:00</published><updated>2016-12-02T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2016-12-02:blog/2016/12/02/tips-on-repos-conf/</id><summary type="html">&lt;p&gt;これは&lt;a class="reference external" href="http://www.adventar.org/calendars/1493"&gt;Gentoo Advent Calendar 2016&lt;/a&gt; 2日目に寄稿した文章です。&lt;/p&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Brackets Salad</title><link href="http://omasanori.github.io/" rel="alternate"></link><link href="http://omasanori.github.io/feeds/all.atom.xml" rel="self"></link><id>http://omasanori.github.io/</id><updated>2016-12-08T01:00:00+09:00</updated><entry><title>書ける！ebuild</title><link href="http://omasanori.github.io/blog/2016/12/08/writing-ebuild-crash-course/" rel="alternate"></link><published>2016-12-08T01:00:00+09:00</published><updated>2016-12-08T01:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2016-12-08:blog/2016/12/08/writing-ebuild-crash-course/</id><summary type="html">&lt;p&gt;これは&lt;a class="reference external" href="http://www.adventar.org/calendars/1493"&gt;Gentoo Advent Calendar 2016&lt;/a&gt; 7日目に遅刻した文章です。&lt;/p&gt;
+&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;はじめに&lt;/h2&gt;
+&lt;p&gt;Gentoo Linuxに限らず、Linuxディストリビューションの多くにはパッケージマネージャというアプリケーションがインストールされており、システムの構成を管理することができます。一度それに慣れてしまうと、一つ一つ自分でビルドしてインストールし、不都合が起きたら調整してから再度インストールするという原始的な管理方法は次第に苦痛になり、統一的なインターフェースでシステムを組み替えられる日々を謳歌し、そして壁に突き当たります。すなわち、欲しいソフトウェアをパッケージマネージャでインストールできないという壁に。&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;そのソフトウェアのパッケージそのものが用意されていない&lt;/li&gt;
+&lt;li&gt;インストールできるバージョンが欲しいバージョンとは異なる&lt;/li&gt;
+&lt;li&gt;コンパイルオプションなどの違いで欲しい機能が組み込まれていない&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;具体的な悩みは場合によって様々です。いずれにせよ、欲しいソフトウェアをどのようにしてシステムに組み込むかは悩みどころです。昔ながらのやり方はシステムの更新で静かに破綻する危険性があり、パッケージを作るのは単なるconfigure &amp;amp;&amp;amp; make &amp;amp;&amp;amp; make installとは異なる手順を要します。&lt;/p&gt;
+&lt;p&gt;Gentooの場合、ebuildと呼ばれるテキストファイルにビルドやインストールに必要な手順を書くことでパッケージを作ることができます。幸いなことに、後述するeclassのおかげで、一般的な手順でインストールできるソフトウェアはebuildにソースコードの入手元URLなどの数行を書くだけで済むこともあります。&lt;/p&gt;
+&lt;p&gt;この文書はまだebuildを書いたことがないGentoo者の背中を押すために書かれたものです。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;ebuildを書くまで&lt;/h2&gt;
+&lt;p&gt;いくらebuildを書くのが簡単な場合もあるとはいえ、書かずに済むならその方が良いこともあります。また、実際にebuildを書く前にはちょっとした準備が必要ですし、書く上でのコツもあります。まずはその辺りのポイントを押さえていきます。&lt;/p&gt;
+&lt;div class="section" id="gentoo"&gt;
+&lt;h3&gt;Gentooリポジトリにパッケージが本当にないのか？&lt;/h3&gt;
+&lt;p&gt;欲しいソフトウェアの名前が思ったような名前でないことは珍しくありません。Gentoo Hancbookではlspciコマンドのためにpciutilsパッケージをインストールしますが、それ以外にもそのような例は沢山あります。欲しいコマンドがライブラリの付属品だったり、名前にハイフンがあったりなかったり、名前に何かが付け足されていたり、パッケージが見つからない理由は様々です。&lt;/p&gt;
+&lt;p&gt;大抵、Gentooリポジトリにあるebuildは即興で書けるものよりもうまく書かれています。まずはemerge --search(desc)などによるGentooリポジトリの探索に少し時間を割きましょう。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id3"&gt;
+&lt;h3&gt;既存のオーバレイで解決できないか？&lt;/h3&gt;
+&lt;p&gt;様々なソフトウェアと相互に依存する巨大なパッケージを作るのはGentooであっても（場合によってはGentooであるからこそ）容易なことではありません。Gentooリポジトリにebuildがなかったとしても、なんとか書かずに済ませられないか。もしかしたら、他の人が作ったオーバレイを使えるかもしれません。&lt;/p&gt;
+&lt;p&gt;オーバレイとは、主となるGentooリポジトリを補完するために作るebuildなどの集積所です。あなたがebuildを書くときにも、システムのどこかにオーバレイを用意して、そこにebuildを置きます。&lt;/p&gt;
+&lt;p&gt;Gentoo開発者もそうでない人も含めて、様々な人々がインターネット上にオーバレイを公開しており、その一部は&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Layman"&gt;layman&lt;/a&gt;を通して容易にシステムへ組み込むことができます。例えば、Gentooリポジトリにはまだ入っていない新しいMonoをインストールしたい場合はDotnetプロジェクトに所属しているGentoo開発者が管理しているdotnetオーバレイをlaymanで組み込むことができます。&lt;/p&gt;
+&lt;p&gt;laymanで組み込めないオーバレイも自分でrepos.confを書けばシステムに組み込めます。手前味噌ではありますが、本アドベントカレンダー2日目の&lt;a class="reference external" href="http://omasanori.github.io/blog/2016/12/02/tips-on-repos-conf/"&gt;repos.confに関するtips&lt;/a&gt;でこの辺りの話に少し触れています。&lt;/p&gt;
+&lt;p&gt;他の人が書いたオーバレイを使う際には、それらがGentooリポジトリとは異なることに注意してください。Gentooリポジトリとは管理方針が異なるでしょうし、そのオーバレイのebuildがよからぬことをしていないかどうかを十分多くの目が見張っていないかもしれません。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id4"&gt;
+&lt;h3&gt;ローカルオーバレイを作る&lt;/h3&gt;
+&lt;p&gt;どうやらebuildを書くことになりそうだと思ったら、自分のebuildを置くローカルオーバレイを作りましょう。&lt;/p&gt;
+&lt;p&gt;今回は/usr/local/portageにomasanori-localという名前のオーバレイを作ることにします。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# mkdir -p /usr/local/portage/{profiles,metadata}
+# echo 'omasanori-local' &amp;gt; /usr/local/portage/profiles/repo_name
+# echo &amp;lt;&amp;lt; EOF &amp;gt; /usr/local/portage/metadata/layout.conf
+masters = gentoo
+thin-manifests = true
+EOF
+# echo &amp;lt;&amp;lt; EOF &amp;gt; /etc/portage/repos.conf/local.conf
+[omasanori-local]
+location = /usr/local/portage
+masters = gentoo
+auto-sync = no
+EOF
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="skel-ebuild"&gt;
+&lt;h3&gt;skel.ebuildから始める&lt;/h3&gt;
+&lt;p&gt;/usr/portageにはskel.ebuildという名前でebuildの骨組みが置かれています。このファイルを読むことでebuildにどのような事柄を記載すればよいかがわかります。実際にebuildを作る際もskel.ebuildをコピーしてから必要に応じて書き換えるとよいでしょう。&lt;/p&gt;
+&lt;p&gt;例えば、foobarのバージョン1.0.0をインストールするためのnet-misc/foobar-1.0.0というパッケージを作りたい場合はこのようにして始めます。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# mkdir -p /usr/local/portage/net-misc/foobar
+# cp /usr/portage/skel.ebuild /usr/local/portage/net-misc/foobar/foobar-1.0.0.ebuild
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="eclass"&gt;
+&lt;h3&gt;eclassを知る&lt;/h3&gt;
+&lt;p&gt;/usr/portage/eclassにはebuildを書く上で有用な「ライブラリ」であるeclassが置かれています。特定のパッケージ群（例えばQt）のために書かれたeclassや言語特有のeclass、ビルドツールに応じたeclassなど、Gentooリポジトリを支える多くのコードが詰まっています。&lt;/p&gt;
+&lt;p&gt;skel.ebuildを読んで愚直にビルド手順を書いてみると数十行にわたるコマンド列ができる場合でも、eclassを上手く使えば何分の一にもなることがあります。もっと楽に書けないかと思ったときは&lt;a class="reference external" href="https://devmanual.gentoo.org/eclass-reference/"&gt;eclassのリファレンス&lt;/a&gt;を眺めてみましょう。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id6"&gt;
+&lt;h3&gt;ebuildを書き上げたら&lt;/h3&gt;
+&lt;p&gt;さて、それらしいebuildが書けたら早速インストール……の前に、ソースコードの入ったtarballなどのチェックサムを保存しているManifestというファイルを生成します。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# ebuild /usr/local/portage/net-misc/foobar/foobar-1.0.0.ebuild manifest
+&lt;/pre&gt;
+&lt;p&gt;上手くいったらemerge net-misc/foobarしてみましょう。記述に問題がなければworldにあなたのパッケージが刻まれます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id7"&gt;
+&lt;h2&gt;いくつかの実例&lt;/h2&gt;
+&lt;p&gt;ここまでは一般的な話をしてきましたが、ここからは私がこれまでに自分で書いたebuildからいくつか選んで話していきます。&lt;/p&gt;
+&lt;div class="section" id="id8"&gt;
+&lt;h3&gt;ケース1: フォントを追加したい&lt;/h3&gt;
+&lt;p&gt;私が初めてebuildを書いたのは、使いたいフォントがあるからでした。&lt;/p&gt;
+&lt;p&gt;もちろん自分でtarballをダウンロードして適当なディレクトリに置いてもよかったのですが、/usr/share以下にパッケージマネージャを使わずに手を加えるのはシステムの更新時に上書きされる可能性を考えると避けたいですし、ホームディレクトリに置くと他のユーザからは使えなくなります。そういうわけで、私はebuildに初挑戦しました。以下がそのebuildの全文です。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# Copyright 1999-2015 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+EAPI=5
+inherit font
+
+MY_P=&amp;quot;Koruri-${PV}&amp;quot;
+DESCRIPTION=&amp;quot;Japanese TrueType font based on M+ outline fonts and Open Sans&amp;quot;
+HOMEPAGE=&amp;quot;http://sourceforge.jp/projects/koruri/&amp;quot;
+SRC_URI=&amp;quot;mirror://sourceforge.jp/${PN}/63497/${MY_P}.tar.xz&amp;quot;
+
+LICENSE=&amp;quot;mplus-fonts Apache-2.0&amp;quot;
+SLOT=&amp;quot;0&amp;quot;
+KEYWORDS=&amp;quot;~amd64 ~arm ~arm64 ~x86&amp;quot;
+
+# Only installs fonts
+RESTRICT=&amp;quot;binchecks strip&amp;quot;
+
+S=&amp;quot;${WORKDIR}/${MY_P}&amp;quot;
+FONT_S=&amp;quot;${S}&amp;quot;
+FONT_SUFFIX=&amp;quot;ttf&amp;quot;
+DOCS=&amp;quot;README*&amp;quot;
+&lt;/pre&gt;
+&lt;p&gt;はい、これだけです。skel.ebuildを読むとわかるように、ebuildにはインストールまでの各工程に対応する手続きを書くのですが、eclassから引き継いだ手続きで十分であれば書くべき内容は「どこから持ってくる」「どんなものなのか」の説明がほとんどです。&lt;/p&gt;
+&lt;p&gt;なんだか簡単に書けそうな気がしてきませんか？&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="tarball"&gt;
+&lt;h3&gt;ケース2: tarballの配布場所変更に対応したい&lt;/h3&gt;
+&lt;p&gt;単にバージョンが上がっただけなら、ebuildをコピーしてファイル名のバージョン部分だけを変更するとうまくいくこともよくあります。&lt;/p&gt;
+&lt;p&gt;しかし、プロジェクトの本拠地がSourceForgeからGitHubに変わったり、独自ドメインを取得してそこに引っ越したり、.tgzになっていた拡張子がいつの間にかtar.gzに変わったりして、tarballを取得できないこともあります。そんなときはSRC_URIを書き換えましょう。&lt;/p&gt;
+&lt;p&gt;例えば、Single Unix Specificationという文書をインストールするapp-doc/single-unix-specificationパッケージで最新の2016年版をインストールするために必要な作業はSRC_URIを&lt;a class="reference external" href="http://pubs.opengroup.org/onlinepubs/9699919799/download/susv4tc2.tar.bz2"&gt;http://pubs.opengroup.org/onlinepubs/9699919799/download/susv4tc2.tar.bz2&lt;/a&gt;にすることと、それに伴ってS=&amp;quot;${WORKDIR}/susv4tc1&amp;quot;という行のtc1をtc2に置き換えるだけでした。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="rubygems"&gt;
+&lt;h3&gt;ケース3: Rubygemsにあるパッケージを入れたい&lt;/h3&gt;
+&lt;p&gt;言語ごとのパッケージマネージャは広く使われるようになりましたが、Cライブラリとリンクする類のライブラリを扱うときには若干の注意が必要です。できることなら、Cライブラリの更新に伴って、必要なパッケージだけ再ビルドしてほしいところです。ebuildならそれができます。まあ、そうでなくともケース1と同様の理由でebuildを書きたいこともあるでしょう。&lt;/p&gt;
+&lt;p&gt;以下は昔書いた&lt;a class="reference external" href="http://adlint.sourceforge.net/"&gt;adlint&lt;/a&gt;のebuildです。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# Copyright 1999-2013 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+EAPI=5
+
+USE_RUBY=&amp;quot;ruby19 ruby20 ruby21&amp;quot;
+RUBY_FAKEGEM_EXTRAINSTALL=&amp;quot;etc&amp;quot;
+
+inherit ruby-fakegem
+
+DESCRIPTION=&amp;quot;A static source code analyzer for C&amp;quot;
+HOMEPAGE=&amp;quot;http://adlint.sourceforge.net/&amp;quot;
+
+LICENSE=&amp;quot;GPL-3&amp;quot;
+SLOT=&amp;quot;0&amp;quot;
+KEYWORDS=&amp;quot;~amd64 ~x86&amp;quot;
+IUSE=&amp;quot;&amp;quot;
+&lt;/pre&gt;
+&lt;p&gt;ケース1よりも短くなっていますが、掲載ミスではありません。ruby-fakegemというeclassのおかげで、Rubygemsからインストールできる場合はもはやSRC_URIすら書かなくてもよくなり、ほぼメタデータしか書かれていません。Rubygemsからインストールできない場合でも、ruby-ngというeclassがシステムにある複数バージョンのRubyにインストールする面倒を見てくれます。&lt;/p&gt;
+&lt;p&gt;Rubyだけでなく、Java、Python、Perlなど様々な言語に向けたeclassが用意されています。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="configuremakemake-install"&gt;
+&lt;h3&gt;ケース4: configureしてmakeしてmake install系のソフトウェアを入れたい&lt;/h3&gt;
+&lt;p&gt;様々なメタビルドツールであふれている今でも、Autotoolsを使ってビルドするソフトウェアは数多く存在しています。そうしたソフトウェアをインストールするためのebuildの一例をお見せします。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# Copyright 1999-2014 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+EAPI=5
+
+inherit autotools-multilib
+
+DESCRIPTION=&amp;quot;A library to retrieve the information in the NamesList.txt
+published by the Unicode Consortium.&amp;quot;
+HOMEPAGE=&amp;quot;https://bitbucket.org/sortsmill/libunicodenames/&amp;quot;
+SRC_URI=&amp;quot;mirror://bitbucket/sortsmill/${PN}-new-repo/downloads/${P}.tar.xz&amp;quot;
+
+LICENSE=&amp;quot;LGPL-3+&amp;quot;
+SLOT=&amp;quot;0&amp;quot;
+KEYWORDS=&amp;quot;~amd64 ~x86&amp;quot;
+IUSE=&amp;quot;cxx nls static-libs&amp;quot;
+
+DEPEND=&amp;quot;virtual/pkgconfig
+        nls? ( &amp;gt;=sys-devel/gettext-0.18.1 )&amp;quot;
+RDEPEND=&amp;quot;&amp;quot;
+
+src_configure() {
+        local myeconfargs=(
+                $(use_enable cxx c++)
+                $(use_enable nls)
+        )
+        autotools-multilib_src_configure
+}
+
+src_install() {
+        autotools-multilib_src_install
+
+        # Use pkgconfig instead of libtool's .la file.
+        prune_libtool_files --modules
+}
+&lt;/pre&gt;
+&lt;p&gt;今までに比べると長くなりましたが、それでも全体で40行に満たない短いファイルです。myeconfargsという部分（configureに渡す--enable-xyzといった引数をUSEフラグを元に構築している）以外はskel.ebuildから得られる知識で読める部分も多いと思います。&lt;/p&gt;
+&lt;p&gt;ここでのポイントはautotools-multilibというeclassで、例によって実際の仕事の大部分はこのeclassに書かれています。&lt;/p&gt;
+&lt;p&gt;Autotoolsだけでなく、CMakeやSConsといった他のビルドツール向けのeclassもあるので、リファレンスのページでビルドツールの名前を検索してみるのも良いと思います。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="use"&gt;
+&lt;h3&gt;ケース5: USEフラグを追加したい&lt;/h3&gt;
+&lt;p&gt;ケース4でも触れたように、USEフラグの設定をebuild内で扱う場面のひとつにconfigureへの引数があります。こうした引数はバージョンが上がる際にしばしば追加されますが、USEフラグが追加されていないがためにその機能を有効にしてビルドする方法がないこともあります。&lt;/p&gt;
+&lt;p&gt;例として、xtermに注目します。最近のxtermはSixelやReGISといった比較的後期のDEC VTが有していたグラフィックス機能を実装しています。これらのグラフィックス機能はconfigureで--enable-sixel-graphicsといった引数を与えることで有効になりますが、Gentooリポジトリのx11-terms/xtermにはそのようなことをする機能がありません。&lt;/p&gt;
+&lt;p&gt;それではSixelを使えるxtermのebuildを作ってみましょう。まずはローカルオーバレイにバージョンに-r1などと付け加えた名前でxtermのebuildをコピーします（例えばxterm-327-r1.ebuild）。&lt;/p&gt;
+&lt;p&gt;そしてIUSEにsixelを含めます。例えば以下のように。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+IUSE=&amp;quot;+openpty sixel toolbar truetype unicode Xaw3d xinerama&amp;quot;
+&lt;/pre&gt;
+&lt;p&gt;今度はeconfの後に並ぶconfigureの引数の列にsixelのものを付け加えます。例えば以下のように。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+...
+$(use_enable openpty) \
+$(use_enable sixel sixel-graphics) \
+$(use_enable toolbar) \
+...
+&lt;/pre&gt;
+&lt;p&gt;今回のように外部のソフトウェアへの依存関係が増えない類であれば、必要な仕事はこれで大体終わりです。新たなライブラリとリンクしなければならない場合などはRDEPENDやDEPENDなどに必要なパッケージを追加しましょう。（USEフラグを条件にして依存するように書くのを忘れずに！）&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id9"&gt;
+&lt;h2&gt;おわりに&lt;/h2&gt;
+&lt;p&gt;いくつかの事例を紹介しましたが、慎重な方であれば「でも、これは簡単そうな例だけを取り上げてるだけじゃないか？」と思うことでしょう。その通りです。&lt;/p&gt;
+&lt;p&gt;ebuildを書いていく中で、今回紹介したものを含むeclassが役に立つ場合は多いですが、そうでもない場合もあります。また、この文書にはebuildの詳細な仕様も記載されておらず、ebuildで使う様々な「コマンド」、今回登場したものでいうとeconfなどについても説明していません。また、metadata.xmlやfilesディレクトリなども知っておくことが重要です。良いebuildを書くために必要な更なる知識は以下の文書で得られることでしょう。&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Basic_guide_to_write_Gentoo_Ebuilds"&gt;Basic guide to write Gentoo Ebuilds&lt;/a&gt;ではebuildの基礎が説明されています。&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Package_Manager_Specification"&gt;Package Manager Specification&lt;/a&gt;にはebuildの仕様書があります。&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://devmanual.gentoo.org/index.html"&gt;Gentoo Development Guide&lt;/a&gt;はGentoo開発者のためのガイドです。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;もし便利なebuildが書けたら、GitHubなどで自分のローカルオーバレイを公開するのも良いでしょう。また、Gentooリポジトリにあるebuildを修正した場合は、Gentooリポジトリに取り込んでもらうべく&lt;a class="reference external" href="https://bugs.gentoo.org/"&gt;GentooのBugzilla&lt;/a&gt;への報告や&lt;a class="reference external" href="https://github.com/gentoo/gentoo"&gt;GitHubミラー&lt;/a&gt;へのプルリクエストをぜひ検討してみてください。&lt;/p&gt;
+&lt;p&gt;この文書を読む前よりもebuildを身近に感じられますように。&lt;/p&gt;
+&lt;/div&gt;
+</summary></entry><entry><title>repos.confに関するtips</title><link href="http://omasanori.github.io/blog/2016/12/02/tips-on-repos-conf/" rel="alternate"></link><published>2016-12-02T00:00:00+09:00</published><updated>2016-12-02T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2016-12-02:blog/2016/12/02/tips-on-repos-conf/</id><summary type="html">&lt;p&gt;これは&lt;a class="reference external" href="http://www.adventar.org/calendars/1493"&gt;Gentoo Advent Calendar 2016&lt;/a&gt; 2日目に寄稿した文章です。&lt;/p&gt;
 &lt;p&gt;&lt;a class="reference external" href="https://twitter.com/naota344/status/801896700470169600"&gt;Gentooは市民の義務&lt;/a&gt;、皆さんご存知ですね？&lt;/p&gt;
 &lt;div class="section" id="id1"&gt;
 &lt;h2&gt;はじめに&lt;/h2&gt;
