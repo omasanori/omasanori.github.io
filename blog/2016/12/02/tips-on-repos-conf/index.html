@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+          <title>Brackets Salad - repos.confに関するtips</title>
+        <meta charset="utf-8" />
+        <meta name="generator" content="Pelican" />
+        <link href="http://omasanori.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Brackets Salad Full Atom Feed" />
+
+
+
+
+
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="http://omasanori.github.io/">Brackets Salad</a></h1>
+        </header><!-- /#banner -->
+        <nav id="menu"><ul>
+            <li class="active"><a href="http://omasanori.github.io/blog/category/misc/">misc</a></li>
+        </ul></nav><!-- /#menu -->
+<section id="content" class="body">
+  <header>
+    <h2 class="entry-title">
+      <a href="http://omasanori.github.io/blog/2016/12/02/tips-on-repos-conf/" rel="bookmark"
+         title="Permalink to repos.confに関するtips">repos.confに関するtips</a></h2>
+ 
+  </header>
+  <footer class="post-info">
+    <time class="published" datetime="2016-12-02T00:00:00+09:00">
+      2016-12-02
+    </time>
+    <address class="vcard author">
+      By           <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
+    </address>
+    <div class="category">
+        Category: <a href="http://omasanori.github.io/blog/category/misc/">misc</a>
+    </div>
+  </footer><!-- /.post-info -->
+  <div class="entry-content">
+    <p>これは<a class="reference external" href="http://www.adventar.org/calendars/1493">Gentoo Advent Calendar 2016</a> 2日目に寄稿した文章です。</p>
+<p><a class="reference external" href="https://twitter.com/naota344/status/801896700470169600">Gentooは市民の義務</a>、皆さんご存知ですね？</p>
+<div class="section" id="id1">
+<h2>はじめに</h2>
+<p>最近のPortageでoverlayを追加するときにはrepos.confという設定ファイルを書くことになっています。このrepos.confについての情報はGentoo Wikiのいくつかのページに分散しています。主な文書は次の3つです。</p>
+<ul class="simple">
+<li><a class="reference external" href="https://wiki.gentoo.org/wiki/Project:Portage/Sync">Project:Portage/Sync</a></li>
+<li><a class="reference external" href="https://wiki.gentoo.org/wiki//etc/portage/repos.conf">/etc/portage/repos.conf</a></li>
+<li><a class="reference external" href="https://wiki.gentoo.org/wiki/Overlay/Local_overlay">Overlay/Local overlay</a></li>
+</ul>
+<p>この文章はこれらに書かれているrepos.confの機能からよく使うものを抜粋した覚書です。</p>
+</div>
+<div class="section" id="repos-conf">
+<h2>repos.confをはじめる</h2>
+<p>最新のGentoo Handbookにはrepos.confを前提とした説明が掲載されているので、指示通りにやれば問題ありません。</p>
+<p>まだrepos.confに移行していない古い環境がある場合は、Portageを更新してから/etc/portage/repos.confディレクトリを作り、その中に/usr/share/portage/config/repos.confを適当な名前でコピーすればとりあえず動きます。</p>
+<p>更にlaymanを使っている場合は、バージョン2.3以降のlayman（現時点ではunstable）に新しい機構に対応するためのsync-plugin-portageというUSEフラグがあるので、これを有効にしてから/etc/layman/layman.cfgのconf_typeをrepos.confにし、layman-updater -Rした後でlaymanのmake.confを削除します。</p>
+</div>
+<div class="section" id="gentoo-treersyncwebrsync">
+<h2>Gentoo treeの同期方法をrsyncからwebrsyncに切り替える</h2>
+<p>gentooリポジトリの設定部分でsync-typeをrsyncからwebrsyncに切り替えてsync-uriを削除すればemerge-webrsync相当の方法でGentoo treeを同期します。</p>
+<p>webrsyncでダウンロードしてきたebuildツリーのアーカイブはOpenPGP鍵で署名されており、それを検証できるのがwebrsync方式の大きな利点ですが、検証のためには追加の手順が必要です。<a class="reference external" href="https://wiki.gentoo.org/wiki/Handbook:Parts/Working/Features">Gentoo HandbookのFeatures</a>を参照してください。</p>
+</div>
+<div class="section" id="gentoo-treersyncgit">
+<h2>Gentoo treeの同期方法をrsyncからgitに切り替える</h2>
+<p>gentooリポジトリの設定部分でsync-typeをrsyncからgitに切り替えてsync-uriを適当なリポジトリに変更すればGitでGentoo treeを同期します。</p>
+<p>が、これはむしろ他のoverlayを使うときによく使っている気もします。</p>
+</div>
+<div class="section" id="overlay">
+<h2>新しいoverlayを追加する</h2>
+<p>たとえばRust overlayを使いたくなったとき、laymanをインストールしていればいつも通りlayman -a rustすれば使えるようになりますが、laymanを使っていない場合は/etc/portage/repos.conf/rust.confで次のように書きます。</p>
+<pre class="literal-block">
+[rust]
+location = /usr/local/overlay/rust
+sync-type = git
+sync-uri = https://github.com/gentoo/gentoo-rust.git
+</pre>
+<p>その後でsyncすれば使えるようになります。他のoverlayでも、どこにあってどの方法で同期するかによってsync-typeとsync-uriを調整すれば同じ手順で使えます。</p>
+</div>
+<div class="section" id="crossdev">
+<h2>crossdevを使う</h2>
+<p>Gentooにはクロスツールチェーンをインストールするのに便利なcrossdevというツールがあります。crossdevはtripletごとにカテゴリを作ってebuildをそこにコピーするので、専用のoverlayが必要になります。それは次のような手順で作ります。</p>
+<pre class="literal-block">
+# mkdir -p /usr/local/overlay/crossdev/{profiles,metadata}
+# echo 'crossdev' &gt; /usr/local/overlay/crossdev/profiles/repo_name
+# echo &lt;&lt; EOF &gt; /usr/local/overlay/crossdev/metadata/layout.conf
+masters = gentoo
+thin-manifests = true
+EOF
+# echo &lt;&lt; EOF &gt; /etc/portage/repos.conf/crossdev.conf
+[crossdev]
+location = /usr/local/overlay/crossdev
+masters = gentoo
+priority = 10
+auto-sync = no
+EOF
+# chown -R portage:portage /usr/local/overlay/crossdev
+</pre>
+</div>
+<div class="section" id="id2">
+<h2>おわりに</h2>
+<p>overlayごとに/etc/portage/repos.conf以下にファイルを置けばうまくやってくれる今の仕組みは私好みでいいなぁと思っています。</p>
+<p>Happy emerging!</p>
+</div>
+
+  </div><!-- /.entry-content -->
+</section>
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="https://getpelican.com/">Pelican</a>,
+                which takes great advantage of <a href="https://www.python.org/">Python</a>.
+                </address><!-- /#about -->
+        </footer><!-- /#contentinfo -->
+</body>
+</html>

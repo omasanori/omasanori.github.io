@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+          <title>Brackets Salad - Icecreamの使い方メモ</title>
+        <meta charset="utf-8" />
+        <meta name="generator" content="Pelican" />
+        <link href="http://omasanori.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Brackets Salad Full Atom Feed" />
+
+
+
+
+
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="http://omasanori.github.io/">Brackets Salad</a></h1>
+        </header><!-- /#banner -->
+        <nav id="menu"><ul>
+            <li class="active"><a href="http://omasanori.github.io/blog/category/misc/">misc</a></li>
+        </ul></nav><!-- /#menu -->
+<section id="content" class="body">
+  <header>
+    <h2 class="entry-title">
+      <a href="http://omasanori.github.io/blog/2015/01/26/how-to-use-icecream/" rel="bookmark"
+         title="Permalink to Icecreamの使い方メモ">Icecreamの使い方メモ</a></h2>
+ 
+  </header>
+  <footer class="post-info">
+    <time class="published" datetime="2015-01-26T19:43:00+09:00">
+      2015-01-26
+    </time>
+    <address class="vcard author">
+      By           <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
+    </address>
+    <div class="category">
+        Category: <a href="http://omasanori.github.io/blog/category/misc/">misc</a>
+    </div>
+  </footer><!-- /.post-info -->
+  <div class="entry-content">
+    <p>とりあえずメモ程度。クロスコンパイルやってから整理する。</p>
+<div class="section" id="id1">
+<h2>入れ方</h2>
+<pre class="literal-block">
+# echo 'sys-devel/icecream ~*' &gt;&gt; /etc/portage/package.accept_keywords
+# emerge sys-devel/icecream
+</pre>
+</div>
+<div class="section" id="id2">
+<h2>使い方</h2>
+<p>/usr/libexec/icecc/binにPATHを通す。Portageでのみ使う場合はmake.confのPREROOTPATHに書けばいい。</p>
+<p>ただし、PortageはCHOST込みの名前（例えばx86_64-pc-linux-gnu-gcc）でコンパイラを呼び出す。よって、先ほどの位置にそれらの名前で/usr/bin/iceccへのシンボリックリンクを置く。</p>
+</div>
+<div class="section" id="id3">
+<h2>クロスコンパイル</h2>
+<p>Portageでのみ使う場合はクロスコンパイラさえ配置してあれば先ほどの作業で問題なく動作するはず。今週試す。</p>
+<p>Portage以外でも使う場合は先ほどとは逆に「単なるgccをCHOST付きの名前に置き換えてicecc越しに実行する」という細工をしないと各々のホストコンパイラでコンパイルしてリンク時にエラーを引き起こす。Gentoo Wikiのdistcc関連文書にうまいことやる方法が書かれているのでうまくやる。</p>
+</div>
+<div class="section" id="id4">
+<h2>問題</h2>
+<p>初回起動時にiceccdが死んでる問題があるがrestartするとうまくいく。これのおかげでIcecreamだけは手動で起動するようにしている。</p>
+</div>
+
+  </div><!-- /.entry-content -->
+</section>
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="https://getpelican.com/">Pelican</a>,
+                which takes great advantage of <a href="https://www.python.org/">Python</a>.
+                </address><!-- /#about -->
+        </footer><!-- /#contentinfo -->
+</body>
+</html>

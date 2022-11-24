@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+          <title>Brackets Salad - 最近私が追っているバグなどの話</title>
+        <meta charset="utf-8" />
+        <meta name="generator" content="Pelican" />
+        <link href="http://omasanori.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Brackets Salad Full Atom Feed" />
+
+
+
+
+
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="http://omasanori.github.io/">Brackets Salad</a></h1>
+        </header><!-- /#banner -->
+        <nav id="menu"><ul>
+            <li class="active"><a href="http://omasanori.github.io/blog/category/misc/">misc</a></li>
+        </ul></nav><!-- /#menu -->
+<section id="content" class="body">
+  <header>
+    <h2 class="entry-title">
+      <a href="http://omasanori.github.io/blog/2014/12/05/bugs-what-im-hunting/" rel="bookmark"
+         title="Permalink to 最近私が追っているバグなどの話">最近私が追っているバグなどの話</a></h2>
+ 
+  </header>
+  <footer class="post-info">
+    <time class="published" datetime="2014-12-05T00:00:00+09:00">
+      2014-12-05
+    </time>
+    <address class="vcard author">
+      By           <a class="url fn" href="http://omasanori.github.io/blog/author/masanori-ogino/">Masanori Ogino</a>
+    </address>
+    <div class="category">
+        Category: <a href="http://omasanori.github.io/blog/category/misc/">misc</a>
+    </div>
+  </footer><!-- /.post-info -->
+  <div class="entry-content">
+    <p>これは <a class="reference external" href="http://www.adventar.org/calendars/462">Rust Language Advent Calendar 2014</a> の5日目の記事です。</p>
+<p>……が、当初考えていたものを書きあげられませんでした。見切り発車で2回目の登録をしてすみません。</p>
+<p>とはいえ、登録した以上は何かしら書こうと思い、gentoo-rust関連で私が追っているバグについての話を少々。</p>
+<div class="section" id="gentoo-rust">
+<h2>gentoo-rustとは何か</h2>
+<p>gentoo-rustはGentoo Linuxのoverlay<a class="footnote-reference" href="#id3" id="id2">[1]</a>のひとつで、Rust関連のパッケージを扱っています。</p>
+<p>gentoo-rustのパッケージは長い間メインリポジトリには入っていなかったのですが、gentoo-rustのものとは別に作成された同様のパッケージがメインリポジトリに導入されました。メインリポジトリとgentoo-rustで同名で内容が異なるパッケージが存在するのは好ましくないので、まずgentoo-rustに新しいパッケージを投入した後でテスト期間を経てメインリポジトリに投入するという合意ができました。現在ではgentoo-rustとメインリポジトリのパッケージはテスト中の変更を除けば同一のものです。</p>
+<p>私はgentoo-rustの参加者の一人で、普段はこれを使ってインストールしたRustを使っています。</p>
+<table class="docutils footnote" frame="void" id="id3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[1]</a></td><td>メインのパッケージリポジトリに後乗せする追加リポジトリのこと。UbuntuのPPAのようなものだと考えておけばだいたいあってる。</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="llvm">
+<h2>システムにインストールしたLLVMとの組み合わせ</h2>
+<p>ディストリビューションのパッケージメンテナはパッケージ内に別のパッケージと重複するライブラリをバンドルすることを嫌う傾向があります。バンドルされたライブラリはシステムのライブラリをアップデートしてもそのままなので、プラグイン機構と組み合わさったときに厄介なバグを引き起こしたり、セキュリティバグの修正で手間が増えたりすることを考えればバンドルされたライブラリは避けたいところでしょう。</p>
+<p>Gentoo Linuxでは別の問題もあります。（バイナリパッケージではなく）ソースコードからビルドするパッケージでは、システムのライブラリを使う場合に比べてバンドルされたライブラリを使う場合はビルド時間が伸びることになります。負荷をかけてハードウェアやカーネルのバグを探したい場合や他に暖房器具がない場合を除けば、ビルド時間が短くて困ることはあまりありません。そういうわけで、gentoo-rustのdev-lang/rustパッケージはデフォルトでシステムのLLVMを使うようになりました。</p>
+<p>ところで、私がgentoo-rustに関わりはじめた頃はシステムのLLVMを使うとブートストラップの初段で失敗していました。Rustが自前で当てていたLLVMのパッチが上流にすべて取り込まれたのは3.5以降ということもあって、システムのLLVMでビルドするというのは最近まで難しいことでした。また、今でもバンドルされたLLVMを使う方がrustc開発者の間でも主流ではないかと思います。</p>
+<p>現在、私が追っているバグのひとつは次のコードをシステムのLLVMとリンクしたrustcでコンパイルするとリンクに失敗するというものです。</p>
+<div class="highlight"><pre><span></span><span class="k">use</span><span class="w"> </span><span class="n">std</span>::<span class="n">intrinsics</span>::<span class="n">assume</span><span class="p">;</span><span class="w"></span>
+
+<span class="k">fn</span> <span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="k">unsafe</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">assume</span><span class="p">(</span><span class="mi">1</span><span class="n">u</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="n">u</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+<p>std::intrinsicsというのはコンパイラ内部の組み込み命令を含むモジュールで、LLVM周りの変更でいかにもおかしくなりそうだと思ってテストしたらその通りでした。</p>
+<p>問題の箇所が絞り込めてからバグ報告しようかと思っていたのですが、忘れると良くないので今週末に報告しておきます。</p>
+</div>
+<div class="section" id="python-2python-3">
+<h2>Python 2かPython 3か</h2>
+<p>rustcのコードベース内ではPythonで書かれたスクリプトがいくつか使われており、中にはビルドの過程で呼び出されるものもあります。公式にはPython 2系を使うことになっています<a class="footnote-reference" href="#id5" id="id4">[2]</a>。しかし、デフォルトのPythonを3系にしていてもビルドに成功したという話を聞いたのでいくつか読んでみると、Python 2系でもPython 3系でも動くようになっていたり、Python 2系でないと動かなかったり、（なぜか）Python 3系でないと動かなかったりとまちまちでした。</p>
+<p>現状でも特に不便ではないのですが、将来を考えるとあまり良い状態ではないのでどうしたら良いか思案中です。</p>
+<table class="docutils footnote" frame="void" id="id5" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id4">[2]</a></td><td>LLVMがPython 2を使うようなので、それに合わせている。</td></tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="cargocurl">
+<h2>CargoとcURLのコンパイルオプション</h2>
+<p>CargoはRustのパッケージマネージャとして今ではなくてはならない存在ですが、私の環境では外部パッケージに依存したパッケージをビルドできないバグが発生しています。</p>
+<p>エラーメッセージによるとcURLのコンパイルオプションが原因のようで、gentoo-rust側としてはnet-misc/curlパッケージのUSEフラグを指定する、Cargo（というよりRustのcURLバインディング）側としては可能ならビルド時にオプションを確認するという対応が考えられますが、まだ原因となったコンパイルオプションを絞り込んでいる最中です。</p>
+</div>
+<div class="section" id="id6">
+<h2>おわりに</h2>
+<p>次回から脱稿の目処が立ってから担当に名乗りを上げます。すみませんでした。</p>
+<p>明日は<a class="reference external" href="https://twitter.com/nida_001">&#64;nida_001</a>さんの予定です。</p>
+</div>
+
+  </div><!-- /.entry-content -->
+</section>
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="https://getpelican.com/">Pelican</a>,
+                which takes great advantage of <a href="https://www.python.org/">Python</a>.
+                </address><!-- /#about -->
+        </footer><!-- /#contentinfo -->
+</body>
+</html>

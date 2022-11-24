@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Brackets Salad</title><link href="http://omasanori.github.io/" rel="alternate"></link><link href="http://omasanori.github.io/feeds/all.atom.xml" rel="self"></link><id>http://omasanori.github.io/</id><updated>2016-12-08T01:00:00+09:00</updated><entry><title>書ける！ebuild</title><link href="http://omasanori.github.io/blog/2016/12/08/writing-ebuild-crash-course/" rel="alternate"></link><published>2016-12-08T01:00:00+09:00</published><updated>2016-12-08T01:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2016-12-08:/blog/2016/12/08/writing-ebuild-crash-course/</id><summary type="html">&lt;p class="first last"&gt;まだebuildを書いたことがない人の背中を押すためのなにか。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;これは&lt;a class="reference external" href="http://www.adventar.org/calendars/1493"&gt;Gentoo Advent Calendar 2016&lt;/a&gt; 7日目に遅刻した文章です。&lt;/p&gt;
+&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;はじめに&lt;/h2&gt;
+&lt;p&gt;Gentoo Linuxに限らず、Linuxディストリビューションの多くにはパッケージマネージャというアプリケーションがインストールされており、システムの構成を管理することができます。一度それに慣れてしまうと、一つ一つ自分でビルドしてインストールし、不都合が起きたら調整してから再度インストールするという原始的な管理方法は次第に苦痛になり、統一的なインターフェースでシステムを組み替えられる日々を謳歌し、そして壁に突き当たります。すなわち、欲しいソフトウェアをパッケージマネージャでインストールできないという壁に。&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;そのソフトウェアのパッケージそのものが用意されていない&lt;/li&gt;
+&lt;li&gt;インストールできるバージョンが欲しいバージョンとは異なる&lt;/li&gt;
+&lt;li&gt;コンパイルオプションなどの違いで欲しい機能が組み込まれていない&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;具体的な悩みは場合によって様々です。いずれにせよ、欲しいソフトウェアをどのようにしてシステムに組み込むかは悩みどころです。昔ながらのやり方はシステムの更新で静かに破綻する危険性があり、パッケージを作るのは単なるconfigure &amp;amp;&amp;amp; make &amp;amp;&amp;amp; make installとは異なる手順を要します。&lt;/p&gt;
+&lt;p&gt;Gentooの場合、ebuildと呼ばれるテキストファイルにビルドやインストールに必要な手順を書くことでパッケージを作ることができます。幸いなことに、後述するeclassのおかげで、一般的な手順でインストールできるソフトウェアはebuildにソースコードの入手元URLなどの数行を書くだけで済むこともあります。&lt;/p&gt;
+&lt;p&gt;この文書はまだebuildを書いたことがないGentoo者の背中を押すために書かれたものです。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;ebuildを書くまで&lt;/h2&gt;
+&lt;p&gt;いくらebuildを書くのが簡単な場合もあるとはいえ、書かずに済むならその方が良いこともあります。また、実際にebuildを書く前にはちょっとした準備が必要ですし、書く上でのコツもあります。まずはその辺りのポイントを押さえていきます。&lt;/p&gt;
+&lt;div class="section" id="gentoo"&gt;
+&lt;h3&gt;Gentooリポジトリにパッケージが本当にないのか？&lt;/h3&gt;
+&lt;p&gt;欲しいソフトウェアの名前が思ったような名前でないことは珍しくありません。Gentoo Hancbookではlspciコマンドのためにpciutilsパッケージをインストールしますが、それ以外にもそのような例は沢山あります。欲しいコマンドがライブラリの付属品だったり、名前にハイフンがあったりなかったり、名前に何かが付け足されていたり、パッケージが見つからない理由は様々です。&lt;/p&gt;
+&lt;p&gt;大抵、Gentooリポジトリにあるebuildは即興で書けるものよりもうまく書かれています。まずはemerge --search(desc)などによるGentooリポジトリの探索に少し時間を割きましょう。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id3"&gt;
+&lt;h3&gt;既存のオーバレイで解決できないか？&lt;/h3&gt;
+&lt;p&gt;様々なソフトウェアと相互に依存する巨大なパッケージを作るのはGentooであっても（場合によってはGentooであるからこそ）容易なことではありません。Gentooリポジトリにebuildがなかったとしても、なんとか書かずに済ませられないか。もしかしたら、他の人が作ったオーバレイを使えるかもしれません。&lt;/p&gt;
+&lt;p&gt;オーバレイとは、主となるGentooリポジトリを補完するために作るebuildなどの集積所です。あなたがebuildを書くときにも、システムのどこかにオーバレイを用意して、そこにebuildを置きます。&lt;/p&gt;
+&lt;p&gt;Gentoo開発者もそうでない人も含めて、様々な人々がインターネット上にオーバレイを公開しており、その一部は&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Layman"&gt;layman&lt;/a&gt;を通して容易にシステムへ組み込むことができます。例えば、Gentooリポジトリにはまだ入っていない新しいMonoをインストールしたい場合はDotnetプロジェクトに所属しているGentoo開発者が管理しているdotnetオーバレイをlaymanで組み込むことができます。&lt;/p&gt;
+&lt;p&gt;laymanで組み込めないオーバレイも自分でrepos.confを書けばシステムに組み込めます。手前味噌ではありますが、本アドベントカレンダー2日目の&lt;a class="reference external" href="http://omasanori.github.io/blog/2016/12/02/tips-on-repos-conf/"&gt;repos.confに関するtips&lt;/a&gt;でこの辺りの話に少し触れています。&lt;/p&gt;
+&lt;p&gt;他の人が書いたオーバレイを使う際には、それらがGentooリポジトリとは異なることに注意してください。Gentooリポジトリとは管理方針が異なるでしょうし、そのオーバレイのebuildがよからぬことをしていないかどうかを十分多くの目が見張っていないかもしれません。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id4"&gt;
+&lt;h3&gt;ローカルオーバレイを作る&lt;/h3&gt;
+&lt;p&gt;どうやらebuildを書くことになりそうだと思ったら、自分のebuildを置くローカルオーバレイを作りましょう。&lt;/p&gt;
+&lt;p&gt;今回は/usr/local/portageにomasanori-localという名前のオーバレイを作ることにします。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# mkdir -p /usr/local/portage/{profiles,metadata}
+# echo 'omasanori-local' &amp;gt; /usr/local/portage/profiles/repo_name
+# echo &amp;lt;&amp;lt; EOF &amp;gt; /usr/local/portage/metadata/layout.conf
+masters = gentoo
+thin-manifests = true
+EOF
+# echo &amp;lt;&amp;lt; EOF &amp;gt; /etc/portage/repos.conf/local.conf
+[omasanori-local]
+location = /usr/local/portage
+masters = gentoo
+auto-sync = no
+EOF
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="skel-ebuild"&gt;
+&lt;h3&gt;skel.ebuildから始める&lt;/h3&gt;
+&lt;p&gt;/usr/portageにはskel.ebuildという名前でebuildの骨組みが置かれています。このファイルを読むことでebuildにどのような事柄を記載すればよいかがわかります。実際にebuildを作る際もskel.ebuildをコピーしてから必要に応じて書き換えるとよいでしょう。&lt;/p&gt;
+&lt;p&gt;例えば、foobarのバージョン1.0.0をインストールするためのnet-misc/foobar-1.0.0というパッケージを作りたい場合はこのようにして始めます。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# mkdir -p /usr/local/portage/net-misc/foobar
+# cp /usr/portage/skel.ebuild /usr/local/portage/net-misc/foobar/foobar-1.0.0.ebuild
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="eclass"&gt;
+&lt;h3&gt;eclassを知る&lt;/h3&gt;
+&lt;p&gt;/usr/portage/eclassにはebuildを書く上で有用な「ライブラリ」であるeclassが置かれています。特定のパッケージ群（例えばQt）のために書かれたeclassや言語特有のeclass、ビルドツールに応じたeclassなど、Gentooリポジトリを支える多くのコードが詰まっています。&lt;/p&gt;
+&lt;p&gt;skel.ebuildを読んで愚直にビルド手順を書いてみると数十行にわたるコマンド列ができる場合でも、eclassを上手く使えば何分の一にもなることがあります。もっと楽に書けないかと思ったときは&lt;a class="reference external" href="https://devmanual.gentoo.org/eclass-reference/"&gt;eclassのリファレンス&lt;/a&gt;を眺めてみましょう。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id6"&gt;
+&lt;h3&gt;ebuildを書き上げたら&lt;/h3&gt;
+&lt;p&gt;さて、それらしいebuildが書けたら早速インストール……の前に、ソースコードの入ったtarballなどのチェックサムを保存しているManifestというファイルを生成します。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# ebuild /usr/local/portage/net-misc/foobar/foobar-1.0.0.ebuild manifest
+&lt;/pre&gt;
+&lt;p&gt;上手くいったらemerge net-misc/foobarしてみましょう。記述に問題がなければworldにあなたのパッケージが刻まれます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id7"&gt;
+&lt;h2&gt;いくつかの実例&lt;/h2&gt;
+&lt;p&gt;ここまでは一般的な話をしてきましたが、ここからは私がこれまでに自分で書いたebuildからいくつか選んで話していきます。&lt;/p&gt;
+&lt;div class="section" id="id8"&gt;
+&lt;h3&gt;ケース1: フォントを追加したい&lt;/h3&gt;
+&lt;p&gt;私が初めてebuildを書いたのは、使いたいフォントがあるからでした。&lt;/p&gt;
+&lt;p&gt;もちろん自分でtarballをダウンロードして適当なディレクトリに置いてもよかったのですが、/usr/share以下にパッケージマネージャを使わずに手を加えるのはシステムの更新時に上書きされる可能性を考えると避けたいですし、ホームディレクトリに置くと他のユーザからは使えなくなります。そういうわけで、私はebuildに初挑戦しました。以下がそのebuildの全文です。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# Copyright 1999-2015 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+EAPI=5
+inherit font
+
+MY_P=&amp;quot;Koruri-${PV}&amp;quot;
+DESCRIPTION=&amp;quot;Japanese TrueType font based on M+ outline fonts and Open Sans&amp;quot;
+HOMEPAGE=&amp;quot;http://sourceforge.jp/projects/koruri/&amp;quot;
+SRC_URI=&amp;quot;mirror://sourceforge.jp/${PN}/63497/${MY_P}.tar.xz&amp;quot;
+
+LICENSE=&amp;quot;mplus-fonts Apache-2.0&amp;quot;
+SLOT=&amp;quot;0&amp;quot;
+KEYWORDS=&amp;quot;~amd64 ~arm ~arm64 ~x86&amp;quot;
+
+# Only installs fonts
+RESTRICT=&amp;quot;binchecks strip&amp;quot;
+
+S=&amp;quot;${WORKDIR}/${MY_P}&amp;quot;
+FONT_S=&amp;quot;${S}&amp;quot;
+FONT_SUFFIX=&amp;quot;ttf&amp;quot;
+DOCS=&amp;quot;README*&amp;quot;
+&lt;/pre&gt;
+&lt;p&gt;はい、これだけです。skel.ebuildを読むとわかるように、ebuildにはインストールまでの各工程に対応する手続きを書くのですが、eclassから引き継いだ手続きで十分であれば書くべき内容は「どこから持ってくる」「どんなものなのか」の説明がほとんどです。&lt;/p&gt;
+&lt;p&gt;なんだか簡単に書けそうな気がしてきませんか？&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="tarball"&gt;
+&lt;h3&gt;ケース2: tarballの配布場所変更に対応したい&lt;/h3&gt;
+&lt;p&gt;単にバージョンが上がっただけなら、ebuildをコピーしてファイル名のバージョン部分だけを変更するとうまくいくこともよくあります。&lt;/p&gt;
+&lt;p&gt;しかし、プロジェクトの本拠地がSourceForgeからGitHubに変わったり、独自ドメインを取得してそこに引っ越したり、.tgzになっていた拡張子がいつの間にかtar.gzに変わったりして、tarballを取得できないこともあります。そんなときはSRC_URIを書き換えましょう。&lt;/p&gt;
+&lt;p&gt;例えば、Single Unix Specificationという文書をインストールするapp-doc/single-unix-specificationパッケージで最新の2016年版をインストールするために必要な作業はSRC_URIを&lt;a class="reference external" href="http://pubs.opengroup.org/onlinepubs/9699919799/download/susv4tc2.tar.bz2"&gt;http://pubs.opengroup.org/onlinepubs/9699919799/download/susv4tc2.tar.bz2&lt;/a&gt;にすることと、それに伴ってS=&amp;quot;${WORKDIR}/susv4tc1&amp;quot;という行のtc1をtc2に置き換えるだけでした。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="rubygems"&gt;
+&lt;h3&gt;ケース3: Rubygemsにあるパッケージを入れたい&lt;/h3&gt;
+&lt;p&gt;言語ごとのパッケージマネージャは広く使われるようになりましたが、Cライブラリとリンクする類のライブラリを扱うときには若干の注意が必要です。できることなら、Cライブラリの更新に伴って、必要なパッケージだけ再ビルドしてほしいところです。ebuildならそれができます。まあ、そうでなくともケース1と同様の理由でebuildを書きたいこともあるでしょう。&lt;/p&gt;
+&lt;p&gt;以下は昔書いた&lt;a class="reference external" href="http://adlint.sourceforge.net/"&gt;adlint&lt;/a&gt;のebuildです。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# Copyright 1999-2013 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+EAPI=5
+
+USE_RUBY=&amp;quot;ruby19 ruby20 ruby21&amp;quot;
+RUBY_FAKEGEM_EXTRAINSTALL=&amp;quot;etc&amp;quot;
+
+inherit ruby-fakegem
+
+DESCRIPTION=&amp;quot;A static source code analyzer for C&amp;quot;
+HOMEPAGE=&amp;quot;http://adlint.sourceforge.net/&amp;quot;
+
+LICENSE=&amp;quot;GPL-3&amp;quot;
+SLOT=&amp;quot;0&amp;quot;
+KEYWORDS=&amp;quot;~amd64 ~x86&amp;quot;
+IUSE=&amp;quot;&amp;quot;
+&lt;/pre&gt;
+&lt;p&gt;ケース1よりも短くなっていますが、掲載ミスではありません。ruby-fakegemというeclassのおかげで、Rubygemsからインストールできる場合はもはやSRC_URIすら書かなくてもよくなり、ほぼメタデータしか書かれていません。Rubygemsからインストールできない場合でも、ruby-ngというeclassがシステムにある複数バージョンのRubyにインストールする面倒を見てくれます。&lt;/p&gt;
+&lt;p&gt;Rubyだけでなく、Java、Python、Perlなど様々な言語に向けたeclassが用意されています。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="configuremakemake-install"&gt;
+&lt;h3&gt;ケース4: configureしてmakeしてmake install系のソフトウェアを入れたい&lt;/h3&gt;
+&lt;p&gt;様々なメタビルドツールであふれている今でも、Autotoolsを使ってビルドするソフトウェアは数多く存在しています。そうしたソフトウェアをインストールするためのebuildの一例をお見せします。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# Copyright 1999-2014 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+EAPI=5
+
+inherit autotools-multilib
+
+DESCRIPTION=&amp;quot;A library to retrieve the information in the NamesList.txt
+published by the Unicode Consortium.&amp;quot;
+HOMEPAGE=&amp;quot;https://bitbucket.org/sortsmill/libunicodenames/&amp;quot;
+SRC_URI=&amp;quot;mirror://bitbucket/sortsmill/${PN}-new-repo/downloads/${P}.tar.xz&amp;quot;
+
+LICENSE=&amp;quot;LGPL-3+&amp;quot;
+SLOT=&amp;quot;0&amp;quot;
+KEYWORDS=&amp;quot;~amd64 ~x86&amp;quot;
+IUSE=&amp;quot;cxx nls static-libs&amp;quot;
+
+DEPEND=&amp;quot;virtual/pkgconfig
+        nls? ( &amp;gt;=sys-devel/gettext-0.18.1 )&amp;quot;
+RDEPEND=&amp;quot;&amp;quot;
+
+src_configure() {
+        local myeconfargs=(
+                $(use_enable cxx c++)
+                $(use_enable nls)
+        )
+        autotools-multilib_src_configure
+}
+
+src_install() {
+        autotools-multilib_src_install
+
+        # Use pkgconfig instead of libtool's .la file.
+        prune_libtool_files --modules
+}
+&lt;/pre&gt;
+&lt;p&gt;今までに比べると長くなりましたが、それでも全体で40行に満たない短いファイルです。myeconfargsという部分（configureに渡す--enable-xyzといった引数をUSEフラグを元に構築している）以外はskel.ebuildから得られる知識で読める部分も多いと思います。&lt;/p&gt;
+&lt;p&gt;ここでのポイントはautotools-multilibというeclassで、例によって実際の仕事の大部分はこのeclassに書かれています。&lt;/p&gt;
+&lt;p&gt;Autotoolsだけでなく、CMakeやSConsといった他のビルドツール向けのeclassもあるので、リファレンスのページでビルドツールの名前を検索してみるのも良いと思います。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="use"&gt;
+&lt;h3&gt;ケース5: USEフラグを追加したい&lt;/h3&gt;
+&lt;p&gt;ケース4でも触れたように、USEフラグの設定をebuild内で扱う場面のひとつにconfigureへの引数があります。こうした引数はバージョンが上がる際にしばしば追加されますが、USEフラグが追加されていないがためにその機能を有効にしてビルドする方法がないこともあります。&lt;/p&gt;
+&lt;p&gt;例として、xtermに注目します。最近のxtermはSixelやReGISといった比較的後期のDEC VTが有していたグラフィックス機能を実装しています。これらのグラフィックス機能はconfigureで--enable-sixel-graphicsといった引数を与えることで有効になりますが、Gentooリポジトリのx11-terms/xtermにはそのようなことをする機能がありません。&lt;/p&gt;
+&lt;p&gt;それではSixelを使えるxtermのebuildを作ってみましょう。まずはローカルオーバレイにバージョンに-r1などと付け加えた名前でxtermのebuildをコピーします（例えばxterm-327-r1.ebuild）。&lt;/p&gt;
+&lt;p&gt;そしてIUSEにsixelを含めます。例えば以下のように。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+IUSE=&amp;quot;+openpty sixel toolbar truetype unicode Xaw3d xinerama&amp;quot;
+&lt;/pre&gt;
+&lt;p&gt;今度はeconfの後に並ぶconfigureの引数の列にsixelのものを付け加えます。例えば以下のように。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+...
+$(use_enable openpty) \
+$(use_enable sixel sixel-graphics) \
+$(use_enable toolbar) \
+...
+&lt;/pre&gt;
+&lt;p&gt;今回のように外部のソフトウェアへの依存関係が増えない類であれば、必要な仕事はこれで大体終わりです。新たなライブラリとリンクしなければならない場合などはRDEPENDやDEPENDなどに必要なパッケージを追加しましょう。（USEフラグを条件にして依存するように書くのを忘れずに！）&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id9"&gt;
+&lt;h2&gt;おわりに&lt;/h2&gt;
+&lt;p&gt;いくつかの事例を紹介しましたが、慎重な方であれば「でも、これは簡単そうな例だけを取り上げてるだけじゃないか？」と思うことでしょう。その通りです。&lt;/p&gt;
+&lt;p&gt;ebuildを書いていく中で、今回紹介したものを含むeclassが役に立つ場合は多いですが、そうでもない場合もあります。また、この文書にはebuildの詳細な仕様も記載されておらず、ebuildで使う様々な「コマンド」、今回登場したものでいうとeconfなどについても説明していません。また、metadata.xmlやfilesディレクトリなども知っておくことが重要です。良いebuildを書くために必要な更なる知識は以下の文書で得られることでしょう。&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Basic_guide_to_write_Gentoo_Ebuilds"&gt;Basic guide to write Gentoo Ebuilds&lt;/a&gt;ではebuildの基礎が説明されています。&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Package_Manager_Specification"&gt;Package Manager Specification&lt;/a&gt;にはebuildの仕様書があります。&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://devmanual.gentoo.org/index.html"&gt;Gentoo Development Guide&lt;/a&gt;はGentoo開発者のためのガイドです。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;もし便利なebuildが書けたら、GitHubなどで自分のローカルオーバレイを公開するのも良いでしょう。また、Gentooリポジトリにあるebuildを修正した場合は、Gentooリポジトリに取り込んでもらうべく&lt;a class="reference external" href="https://bugs.gentoo.org/"&gt;GentooのBugzilla&lt;/a&gt;への報告や&lt;a class="reference external" href="https://github.com/gentoo/gentoo"&gt;GitHubミラー&lt;/a&gt;へのプルリクエストをぜひ検討してみてください。&lt;/p&gt;
+&lt;p&gt;この文書を読む前よりもebuildを身近に感じられますように。&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="misc"></category></entry><entry><title>repos.confに関するtips</title><link href="http://omasanori.github.io/blog/2016/12/02/tips-on-repos-conf/" rel="alternate"></link><published>2016-12-02T00:00:00+09:00</published><updated>2016-12-02T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2016-12-02:/blog/2016/12/02/tips-on-repos-conf/</id><summary type="html">&lt;p class="first last"&gt;repos.confについての簡単なまとめ&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;これは&lt;a class="reference external" href="http://www.adventar.org/calendars/1493"&gt;Gentoo Advent Calendar 2016&lt;/a&gt; 2日目に寄稿した文章です。&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://twitter.com/naota344/status/801896700470169600"&gt;Gentooは市民の義務&lt;/a&gt;、皆さんご存知ですね？&lt;/p&gt;
+&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;はじめに&lt;/h2&gt;
+&lt;p&gt;最近のPortageでoverlayを追加するときにはrepos.confという設定ファイルを書くことになっています。このrepos.confについての情報はGentoo Wikiのいくつかのページに分散しています。主な文書は次の3つです。&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Project:Portage/Sync"&gt;Project:Portage/Sync&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki//etc/portage/repos.conf"&gt;/etc/portage/repos.conf&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Overlay/Local_overlay"&gt;Overlay/Local overlay&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;この文章はこれらに書かれているrepos.confの機能からよく使うものを抜粋した覚書です。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="repos-conf"&gt;
+&lt;h2&gt;repos.confをはじめる&lt;/h2&gt;
+&lt;p&gt;最新のGentoo Handbookにはrepos.confを前提とした説明が掲載されているので、指示通りにやれば問題ありません。&lt;/p&gt;
+&lt;p&gt;まだrepos.confに移行していない古い環境がある場合は、Portageを更新してから/etc/portage/repos.confディレクトリを作り、その中に/usr/share/portage/config/repos.confを適当な名前でコピーすればとりあえず動きます。&lt;/p&gt;
+&lt;p&gt;更にlaymanを使っている場合は、バージョン2.3以降のlayman（現時点ではunstable）に新しい機構に対応するためのsync-plugin-portageというUSEフラグがあるので、これを有効にしてから/etc/layman/layman.cfgのconf_typeをrepos.confにし、layman-updater -Rした後でlaymanのmake.confを削除します。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="gentoo-treersyncwebrsync"&gt;
+&lt;h2&gt;Gentoo treeの同期方法をrsyncからwebrsyncに切り替える&lt;/h2&gt;
+&lt;p&gt;gentooリポジトリの設定部分でsync-typeをrsyncからwebrsyncに切り替えてsync-uriを削除すればemerge-webrsync相当の方法でGentoo treeを同期します。&lt;/p&gt;
+&lt;p&gt;webrsyncでダウンロードしてきたebuildツリーのアーカイブはOpenPGP鍵で署名されており、それを検証できるのがwebrsync方式の大きな利点ですが、検証のためには追加の手順が必要です。&lt;a class="reference external" href="https://wiki.gentoo.org/wiki/Handbook:Parts/Working/Features"&gt;Gentoo HandbookのFeatures&lt;/a&gt;を参照してください。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="gentoo-treersyncgit"&gt;
+&lt;h2&gt;Gentoo treeの同期方法をrsyncからgitに切り替える&lt;/h2&gt;
+&lt;p&gt;gentooリポジトリの設定部分でsync-typeをrsyncからgitに切り替えてsync-uriを適当なリポジトリに変更すればGitでGentoo treeを同期します。&lt;/p&gt;
+&lt;p&gt;が、これはむしろ他のoverlayを使うときによく使っている気もします。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="overlay"&gt;
+&lt;h2&gt;新しいoverlayを追加する&lt;/h2&gt;
+&lt;p&gt;たとえばRust overlayを使いたくなったとき、laymanをインストールしていればいつも通りlayman -a rustすれば使えるようになりますが、laymanを使っていない場合は/etc/portage/repos.conf/rust.confで次のように書きます。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+[rust]
+location = /usr/local/overlay/rust
+sync-type = git
+sync-uri = https://github.com/gentoo/gentoo-rust.git
+&lt;/pre&gt;
+&lt;p&gt;その後でsyncすれば使えるようになります。他のoverlayでも、どこにあってどの方法で同期するかによってsync-typeとsync-uriを調整すれば同じ手順で使えます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="crossdev"&gt;
+&lt;h2&gt;crossdevを使う&lt;/h2&gt;
+&lt;p&gt;Gentooにはクロスツールチェーンをインストールするのに便利なcrossdevというツールがあります。crossdevはtripletごとにカテゴリを作ってebuildをそこにコピーするので、専用のoverlayが必要になります。それは次のような手順で作ります。&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+# mkdir -p /usr/local/overlay/crossdev/{profiles,metadata}
+# echo 'crossdev' &amp;gt; /usr/local/overlay/crossdev/profiles/repo_name
+# echo &amp;lt;&amp;lt; EOF &amp;gt; /usr/local/overlay/crossdev/metadata/layout.conf
+masters = gentoo
+thin-manifests = true
+EOF
+# echo &amp;lt;&amp;lt; EOF &amp;gt; /etc/portage/repos.conf/crossdev.conf
+[crossdev]
+location = /usr/local/overlay/crossdev
+masters = gentoo
+priority = 10
+auto-sync = no
+EOF
+# chown -R portage:portage /usr/local/overlay/crossdev
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;おわりに&lt;/h2&gt;
+&lt;p&gt;overlayごとに/etc/portage/repos.conf以下にファイルを置けばうまくやってくれる今の仕組みは私好みでいいなぁと思っています。&lt;/p&gt;
+&lt;p&gt;Happy emerging!&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="misc"></category></entry><entry><title>Icecreamの使い方メモ</title><link href="http://omasanori.github.io/blog/2015/01/26/how-to-use-icecream/" rel="alternate"></link><published>2015-01-26T19:43:00+09:00</published><updated>2015-01-26T19:43:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-26:/blog/2015/01/26/how-to-use-icecream/</id><summary type="html">&lt;p class="first last"&gt;Icecream (icecc) の使い方についてメモしておいた。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;とりあえずメモ程度。クロスコンパイルやってから整理する。&lt;/p&gt;
+&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;入れ方&lt;/h2&gt;
+&lt;pre class="literal-block"&gt;
+# echo 'sys-devel/icecream ~*' &amp;gt;&amp;gt; /etc/portage/package.accept_keywords
+# emerge sys-devel/icecream
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id2"&gt;
+&lt;h2&gt;使い方&lt;/h2&gt;
+&lt;p&gt;/usr/libexec/icecc/binにPATHを通す。Portageでのみ使う場合はmake.confのPREROOTPATHに書けばいい。&lt;/p&gt;
+&lt;p&gt;ただし、PortageはCHOST込みの名前（例えばx86_64-pc-linux-gnu-gcc）でコンパイラを呼び出す。よって、先ほどの位置にそれらの名前で/usr/bin/iceccへのシンボリックリンクを置く。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id3"&gt;
+&lt;h2&gt;クロスコンパイル&lt;/h2&gt;
+&lt;p&gt;Portageでのみ使う場合はクロスコンパイラさえ配置してあれば先ほどの作業で問題なく動作するはず。今週試す。&lt;/p&gt;
+&lt;p&gt;Portage以外でも使う場合は先ほどとは逆に「単なるgccをCHOST付きの名前に置き換えてicecc越しに実行する」という細工をしないと各々のホストコンパイラでコンパイルしてリンク時にエラーを引き起こす。Gentoo Wikiのdistcc関連文書にうまいことやる方法が書かれているのでうまくやる。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id4"&gt;
+&lt;h2&gt;問題&lt;/h2&gt;
+&lt;p&gt;初回起動時にiceccdが死んでる問題があるがrestartするとうまくいく。これのおかげでIcecreamだけは手動で起動するようにしている。&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="misc"></category></entry><entry><title>先週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/26/what-i-did-2015w04/" rel="alternate"></link><published>2015-01-26T19:26:00+09:00</published><updated>2015-01-26T19:26:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-26:/blog/2015/01/26/what-i-did-2015w04/</id><summary type="html">&lt;p class="first last"&gt;先週を振り返った。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;先週は開発ボードを弄っていた。ARM上でまともにプログラムを書くのは初めてなので慣れないところもあるが、何とかなりそうな気がしている。&lt;/p&gt;
+&lt;p&gt;分散コンパイル環境はようやくクロスコンパイルに挑戦しようというところ。&lt;/p&gt;
+</content><category term="misc"></category></entry><entry><title>先週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/19/what-i-did-2015w03/" rel="alternate"></link><published>2015-01-19T23:27:00+09:00</published><updated>2015-01-19T23:27:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-19:/blog/2015/01/19/what-i-did-2015w03/</id><summary type="html">&lt;p class="first last"&gt;月曜になったけど、先週を振り返った。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;先週は主にサーバのセットアップをやっていた。そろそろ開発ボード上で実験したいところ。&lt;/p&gt;
+&lt;p&gt;また、分散コンパイル環境に興味が沸いたので、&lt;a class="reference external" href="http://en.opensuse.org/Icecream"&gt;Icecream&lt;/a&gt;をセットアップした。まだ少し妙なところはあるけれど、そこそこ動く。&lt;/p&gt;
+</content><category term="misc"></category></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2015/01/11/what-i-did-2015w02/" rel="alternate"></link><published>2015-01-11T21:51:00+09:00</published><updated>2015-01-11T21:51:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2015-01-11:/blog/2015/01/11/what-i-did-2015w02/</id><summary type="html">&lt;p class="first last"&gt;久々に今週を振り返った。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;今週は実家から自宅に戻ってきて、受講とサーバ構築で少しずつ感覚を休暇前に戻していた。いくつかバグ報告もした。&lt;/p&gt;
+&lt;p&gt;以前はRubyよりもPythonを好んでいたのでRubyはあまり書かなかったけど、そういう好き嫌いは減らしていこうと思っている。タイミングよくネタがあったので、週末にちょっとしたコードをRubyで書いた。&lt;/p&gt;
+&lt;p&gt;この文章を書き始める少し前まで、1月12日が休みだと気づいていなかった。何をしようか。&lt;/p&gt;
+</content><category term="misc"></category></entry><entry><title>最近私が追っているバグなどの話</title><link href="http://omasanori.github.io/blog/2014/12/05/bugs-what-im-hunting/" rel="alternate"></link><published>2014-12-05T00:00:00+09:00</published><updated>2014-12-05T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-12-05:/blog/2014/12/05/bugs-what-im-hunting/</id><summary type="html">&lt;p class="first last"&gt;ネタが浮かばなかったので最近追っているバグについて書いた。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;これは &lt;a class="reference external" href="http://www.adventar.org/calendars/462"&gt;Rust Language Advent Calendar 2014&lt;/a&gt; の5日目の記事です。&lt;/p&gt;
+&lt;p&gt;……が、当初考えていたものを書きあげられませんでした。見切り発車で2回目の登録をしてすみません。&lt;/p&gt;
+&lt;p&gt;とはいえ、登録した以上は何かしら書こうと思い、gentoo-rust関連で私が追っているバグについての話を少々。&lt;/p&gt;
+&lt;div class="section" id="gentoo-rust"&gt;
+&lt;h2&gt;gentoo-rustとは何か&lt;/h2&gt;
+&lt;p&gt;gentoo-rustはGentoo Linuxのoverlay&lt;a class="footnote-reference" href="#id3" id="id2"&gt;[1]&lt;/a&gt;のひとつで、Rust関連のパッケージを扱っています。&lt;/p&gt;
+&lt;p&gt;gentoo-rustのパッケージは長い間メインリポジトリには入っていなかったのですが、gentoo-rustのものとは別に作成された同様のパッケージがメインリポジトリに導入されました。メインリポジトリとgentoo-rustで同名で内容が異なるパッケージが存在するのは好ましくないので、まずgentoo-rustに新しいパッケージを投入した後でテスト期間を経てメインリポジトリに投入するという合意ができました。現在ではgentoo-rustとメインリポジトリのパッケージはテスト中の変更を除けば同一のものです。&lt;/p&gt;
+&lt;p&gt;私はgentoo-rustの参加者の一人で、普段はこれを使ってインストールしたRustを使っています。&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="id3" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id2"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;メインのパッケージリポジトリに後乗せする追加リポジトリのこと。UbuntuのPPAのようなものだと考えておけばだいたいあってる。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="llvm"&gt;
+&lt;h2&gt;システムにインストールしたLLVMとの組み合わせ&lt;/h2&gt;
+&lt;p&gt;ディストリビューションのパッケージメンテナはパッケージ内に別のパッケージと重複するライブラリをバンドルすることを嫌う傾向があります。バンドルされたライブラリはシステムのライブラリをアップデートしてもそのままなので、プラグイン機構と組み合わさったときに厄介なバグを引き起こしたり、セキュリティバグの修正で手間が増えたりすることを考えればバンドルされたライブラリは避けたいところでしょう。&lt;/p&gt;
+&lt;p&gt;Gentoo Linuxでは別の問題もあります。（バイナリパッケージではなく）ソースコードからビルドするパッケージでは、システムのライブラリを使う場合に比べてバンドルされたライブラリを使う場合はビルド時間が伸びることになります。負荷をかけてハードウェアやカーネルのバグを探したい場合や他に暖房器具がない場合を除けば、ビルド時間が短くて困ることはあまりありません。そういうわけで、gentoo-rustのdev-lang/rustパッケージはデフォルトでシステムのLLVMを使うようになりました。&lt;/p&gt;
+&lt;p&gt;ところで、私がgentoo-rustに関わりはじめた頃はシステムのLLVMを使うとブートストラップの初段で失敗していました。Rustが自前で当てていたLLVMのパッチが上流にすべて取り込まれたのは3.5以降ということもあって、システムのLLVMでビルドするというのは最近まで難しいことでした。また、今でもバンドルされたLLVMを使う方がrustc開発者の間でも主流ではないかと思います。&lt;/p&gt;
+&lt;p&gt;現在、私が追っているバグのひとつは次のコードをシステムのLLVMとリンクしたrustcでコンパイルするとリンクに失敗するというものです。&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;use&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;std&lt;/span&gt;::&lt;span class="n"&gt;intrinsics&lt;/span&gt;::&lt;span class="n"&gt;assume&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+
+&lt;span class="k"&gt;fn&lt;/span&gt; &lt;span class="nf"&gt;main&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="k"&gt;unsafe&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;        &lt;/span&gt;&lt;span class="n"&gt;assume&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="n"&gt;u&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="n"&gt;u&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="w"&gt;    &lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;std::intrinsicsというのはコンパイラ内部の組み込み命令を含むモジュールで、LLVM周りの変更でいかにもおかしくなりそうだと思ってテストしたらその通りでした。&lt;/p&gt;
+&lt;p&gt;問題の箇所が絞り込めてからバグ報告しようかと思っていたのですが、忘れると良くないので今週末に報告しておきます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="python-2python-3"&gt;
+&lt;h2&gt;Python 2かPython 3か&lt;/h2&gt;
+&lt;p&gt;rustcのコードベース内ではPythonで書かれたスクリプトがいくつか使われており、中にはビルドの過程で呼び出されるものもあります。公式にはPython 2系を使うことになっています&lt;a class="footnote-reference" href="#id5" id="id4"&gt;[2]&lt;/a&gt;。しかし、デフォルトのPythonを3系にしていてもビルドに成功したという話を聞いたのでいくつか読んでみると、Python 2系でもPython 3系でも動くようになっていたり、Python 2系でないと動かなかったり、（なぜか）Python 3系でないと動かなかったりとまちまちでした。&lt;/p&gt;
+&lt;p&gt;現状でも特に不便ではないのですが、将来を考えるとあまり良い状態ではないのでどうしたら良いか思案中です。&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="id5" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id4"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;LLVMがPython 2を使うようなので、それに合わせている。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="cargocurl"&gt;
+&lt;h2&gt;CargoとcURLのコンパイルオプション&lt;/h2&gt;
+&lt;p&gt;CargoはRustのパッケージマネージャとして今ではなくてはならない存在ですが、私の環境では外部パッケージに依存したパッケージをビルドできないバグが発生しています。&lt;/p&gt;
+&lt;p&gt;エラーメッセージによるとcURLのコンパイルオプションが原因のようで、gentoo-rust側としてはnet-misc/curlパッケージのUSEフラグを指定する、Cargo（というよりRustのcURLバインディング）側としては可能ならビルド時にオプションを確認するという対応が考えられますが、まだ原因となったコンパイルオプションを絞り込んでいる最中です。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id6"&gt;
+&lt;h2&gt;おわりに&lt;/h2&gt;
+&lt;p&gt;次回から脱稿の目処が立ってから担当に名乗りを上げます。すみませんでした。&lt;/p&gt;
+&lt;p&gt;明日は&lt;a class="reference external" href="https://twitter.com/nida_001"&gt;&amp;#64;nida_001&lt;/a&gt;さんの予定です。&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="misc"></category></entry><entry><title>なぜRustの人はlifetimeとownershipについて話すのか</title><link href="http://omasanori.github.io/blog/2014/12/02/ownership-and-lifetime/" rel="alternate"></link><published>2014-12-02T00:00:00+09:00</published><updated>2014-12-02T00:00:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-12-02:/blog/2014/12/02/ownership-and-lifetime/</id><summary type="html">&lt;p class="first last"&gt;lifetimeとownershipについて振り返ってみる。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;これは &lt;a class="reference external" href="http://www.adventar.org/calendars/462"&gt;Rust Language Advent Calendar 2014&lt;/a&gt; の2日目の記事です。前日は &lt;a class="reference external" href="https://twitter.com/saneyuki_s"&gt;&amp;#64;saneyuki_s&lt;/a&gt; さんの『&lt;a class="reference external" href="http://saneyukis.hatenablog.com/entry/2014/12/01/034929"&gt;Rustプログラミングにおけるデバッグ入門&lt;/a&gt;』でした。&lt;/p&gt;
+&lt;p&gt;今日はlifetimeとownershipの話です。「なんだそれは」と思った方も、「またか」と思った方も、「Rust使ってるからよく知ってるよ」と思った方も少しの間お付き合いください。&lt;/p&gt;
+&lt;div class="section" id="id1"&gt;
+&lt;h2&gt;はじめに&lt;/h2&gt;
+&lt;p&gt;ブラウザの会社が公開したRustというプログラミング言語があります。ブラウザの会社が公開した言語なので、&lt;a class="reference external" href="https://github.com/servo/servo"&gt;Rustで書かれたブラウザ&lt;/a&gt;もあります。このプログラミング言語の特徴の一つがlifetimeとownershipです。&lt;/p&gt;
+&lt;p&gt;例えば、&lt;a class="reference external" href="http://doc.rust-lang.org/intro.html"&gt;Rustの30分イントロダクション&lt;/a&gt;は少し前に書き直されるまではlifetimeとownershipを中心に解説していました。&lt;a class="reference external" href="http://science.raphael.poss.name/rust-for-functional-programmers.html"&gt;関数型言語に慣れ親しんだ人のために書かれた別のRustイントロダクション&lt;/a&gt;でもlifetimeを題した章がありますし、その手前の章ではownershipを扱っています。以前イントロダクションとして評判の良かった&lt;a class="reference external" href="http://rustbyexample.com/"&gt;Rust by Example&lt;/a&gt;でもこれらはそれぞれの章を割り振られています。私が以前イベントでRustについて発表した際もこれらに時間を割いていましたし、東京で開催されているRustのイベントであるRust Samuraiでも直近の回でこれらの解説が行われていました。&lt;/p&gt;
+&lt;p&gt;なぜRustの人はlifetimeとownershipをよく取り上げるのでしょうか。私が思うに、これらの機能がRustコードを支える要であり、これらの機能を持たないプログラミング言語を背景に持つ人にとっては戸惑いの種になることがその理由でしょう。以下でこれらの機能を他の言語のやり方と比較しながら紹介していきます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="lifetime"&gt;
+&lt;h2&gt;lifetime: リソースの寿命&lt;/h2&gt;
+&lt;p&gt;ある程度大きなプログラムは様々なリソースを扱います。例えば、メモリ、ファイル、ソケット、データベースとの接続などがあります。これらを管理する上で重要なのが寿命、つまり不要になる時期です。寿命は短く見積もりすぎても長く見積もりすぎても問題を引き起こします。短く見積もりすぎると不要だと判断されたリソースへのアクセスや頻繁なリソースの再取得が発生し、長く見積もりすぎるとリソースの再分配が滞ります。&lt;/p&gt;
+&lt;p&gt;寿命を扱う原始的な方法は、プログラマー自身がそれを扱うというものです。つまり、プログラミング言語は寿命の管理を補助しません。検証用のツールを通さない限り、コンピュータはあなたの方針に口を出しません。たとえ、明らかに間違っていたとしても。&lt;/p&gt;
+&lt;p&gt;GC (garbage collection) はプログラミング言語が寿命の管理を補助する機構として広く利用されています。GCの手法はトレース (tracing) と参照カウント (reference counting) の2つに大きく分けられますが、どちらも実行時にあるリソースが不要になったことを検知して後始末します。Objective-CのARC (automatic reference counting) もretainとreleaseをコンパイラがプログラマの代わりに挿入する仕組みであって、実行時のコストはretainとreleaseを書く場合と変わりません。&lt;a class="footnote-reference" href="#id3" id="id2"&gt;[1]&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;広く利用されている別の方法として、変数の有効な範囲（スコープ）を寿命と結びつけるものがあります。いわゆるスタック変数はその身近な例です。スコープをコンパイル時に解析できるならば、スコープと結び付けられたリソースが不要になるタイミングもまたコンパイル時に解析できるので、実行時に不要になったかどうかを調べずに済みます。C++などでよく使われているRAII (resource acquisition is initialization) パターンもこの方法に分類できます。&lt;/p&gt;
+&lt;p&gt;lifetimeはスコープを使った方法と似ていますが、重要な違いを含んでいます。それは、有効な範囲に名前を付けて明示的に扱うことができるという点です。この違いによって、「この関数の引数として渡されるリソースの有効範囲は返り値として生成されるリソースの有効範囲を含まなければならない」といった制約を表現することができるようになります。Rustでプログラムを書いていて &amp;quot;does not live long enough&amp;quot; というフレーズを含むメッセージが表示されたときは、コードの中にそうした制約を守っていない部分があることを示しています。&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="id3" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id2"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;ただし、理屈の上ではコンパイラが最適化しやすくなり、Clangのドキュメントでもそのような最適化の可能性を示唆している。とはいえ、大雑把に言うと「ここで参照数を上げてすぐ下げるのは明らかに無駄」というような箇所でそれを省くというもので、真に参照カウントが必要な箇所において実行時のコストがなくなるというわけではない。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class="section" id="ownership"&gt;
+&lt;h2&gt;ownership: リソースの所有権&lt;/h2&gt;
+&lt;p&gt;リソースを管理する際に気を遣うのは寿命だけではありません。ある時点で特定のリソースに何らかの操作をして良いかどうかを管理することも重要です。リソースを「読む」「書き換える」、あるいは「不要になったので後始末する」というのも操作に含まれます。これを適切に管理できなかった場合、リソースやプログラム全体が整合性を損なうことになります。&lt;/p&gt;
+&lt;p&gt;こうした「操作を行う権利」はプログラムが並行に動作する複数の処理単位（プロセス、スレッド、タスクなどの様々な名前があります）によって構成されている場合によく問題となるので、それを管理する方法は並行性と共に論じられがちです。しかし、並行性を含まないプログラムであっても、例えばC言語の関数について書かれたmanページで見かける「関数を呼び出した後のbufの状態は未規定である」という類の文面はまさに操作を行う権利について述べています。&lt;/p&gt;
+&lt;p&gt;Rustのownershipとは、どの有効なリソースもプログラムのある部分に所有されており、あるリソースをある時点で所有している部分はただひとつという制約（所有権）を指しています。例えば、あるタスクが所有権を持っているリソースを同時に別のタスクが所有することはできません。また、ある関数がリソースの所有権を要求しなければ、その関数は所有権が必要な操作を内部で行うことができません。&lt;/p&gt;
+&lt;p&gt;リソースをプログラムの複数の部分で共有するにはどうしたらよいでしょうか。もし本当に共有する必要がないのであれば、リソースを複製するのも可能な場面では有効です。また、所有権は移動する (move) こともできますし、所有権を持つ部分からリソースを借りる (borrow) こともできます。リソースを借りている場合は所有権を持っている場合に比べて制限を受け、またリソースをどこかが借りている場合は所有権を持つ部分も制限を受けます。&lt;/p&gt;
+&lt;p&gt;このようなモデルでは扱えないプログラムを書く場合のために、Rustは抜け道を用意しています。しかし、普段はownershipに従ってコードを書くことでコンパイラに安全性を検証させることができます。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id4"&gt;
+&lt;h2&gt;起源&lt;/h2&gt;
+&lt;p&gt;Rustはlifetimeを導入した初めてのプログラミング言語ではなく、ownershipを導入した初めてのプログラミング言語でもありません。例えば、lifetime（一般的にはregionと呼ばれ、Rustでもかつてはそう呼んでいました）は1960年代にその萌芽が現れたそうです（Wikipediaの&lt;a class="reference external" href="http://en.wikipedia.org/wiki/Region-based_memory_management"&gt;Region-based memory management&lt;/a&gt;によくまとまっている）。私はownershipの起源を知りません（ご存じの方がいらっしゃったらぜひご一報ください）が、RAIIパターンはある種のownershipを表現していますし、Rustの発表以前にも型システムにそのような概念を導入する試みがあった（&lt;a class="reference external" href="http://dl.acm.org/citation.cfm?id=582440"&gt;OOPSLA '02のBoyapatiらによる論文&lt;/a&gt;など）ようです。&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="id5"&gt;
+&lt;h2&gt;おわりに&lt;/h2&gt;
+&lt;p&gt;この記事は、かつてRustについて発表する機会を頂いた際にlifetimeとownershipについてうまく発表できなかったことがきっかけで書かれました。あなたがRustに興味を持つきっかけ、あるいは何か新しいアイデアを得る助けになれば幸いです。&lt;/p&gt;
+&lt;/div&gt;
+</content><category term="misc"></category></entry><entry><title>revdep-rebuildでlibstdc++.so.*に依存したバイナリを探す方法</title><link href="http://omasanori.github.io/blog/2014/11/09/revdep-rebuild-libstdcxx/" rel="alternate"></link><published>2014-11-09T18:59:00+09:00</published><updated>2014-11-09T18:59:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-11-09:/blog/2014/11/09/revdep-rebuild-libstdcxx/</id><summary type="html">&lt;p class="first last"&gt;revdep-rebuild -L &amp;lt;ライブラリ名&amp;gt;の&amp;lt;ライブラリ名&amp;gt;は正規表現として解釈される。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;Gentoo Linuxでlibstdc++.so.6に依存したバイナリを含むパッケージをまとめてリビルドしたい場合はrevdep-rebuildが利用できる。しかし、次のコマンドは意図したように動作しない。:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+revdep-rebuild -L libstdc++.so.6
+&lt;/pre&gt;
+&lt;p&gt;なぜなら、ライブラリ名は正規表現として解釈されるからだ。正しくは次の通り。:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+revdep-rebuild -L 'libstdc\+\+.so.6'
+&lt;/pre&gt;
+&lt;p&gt;libstdc++のABI非互換によって問題が起きたと思しき場合の応急処置として必要となったのでメモ。&lt;/p&gt;
+</content><category term="misc"></category></entry><entry><title>Crossdevを使ってarm-none-eabiのツールチェインを用意する</title><link href="http://omasanori.github.io/blog/2014/07/02/crossdev-arm-none-eabi/" rel="alternate"></link><published>2014-07-02T17:50:00+09:00</published><updated>2014-07-02T17:50:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2014-07-02:/blog/2014/07/02/crossdev-arm-none-eabi/</id><summary type="html">&lt;p class="first last"&gt;ARM用のツールチェインが欲しくなったのでcrossdevで用意した。&lt;/p&gt;
+</summary><content type="html">&lt;pre class="literal-block"&gt;
+$ crossdev -s4 --without-headers -t arm-none-eabi
+&lt;/pre&gt;
+&lt;p&gt;これだけでC・C++・Fortranのフロントエンドが用意される。楽。&lt;/p&gt;
+&lt;p&gt;このくらいの覚書でも書くようにしないと私はブログを日常的に書くことなどできないだろうということに今更気づいた。&lt;/p&gt;
+</content><category term="misc"></category></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2013/09/09/what-i-did-2013w36/" rel="alternate"></link><published>2013-09-09T03:37:00+09:00</published><updated>2013-09-09T03:37:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-09-09:/blog/2013/09/09/what-i-did-2013w36/</id><summary type="html">&lt;p class="first last"&gt;特に何もやっていないけれど、今週を振り返った。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;今週はあまりコードを書かなかった。&lt;/p&gt;
+&lt;p&gt;生活リズムを少しずつ戻していかないと……。&lt;/p&gt;
+</content><category term="misc"></category></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2013/09/01/what-i-did-2013w35/" rel="alternate"></link><published>2013-09-01T08:32:00+09:00</published><updated>2013-09-01T08:32:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-09-01:/blog/2013/09/01/what-i-did-2013w35/</id><summary type="html">&lt;p class="first last"&gt;今週のタスクがまだ終わっていないけど、今週を振り返った。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;今週はOSS系の活動は控えて、学生としての活動に集中していた。&lt;/p&gt;
+&lt;p&gt;来週は少しアウトプットできると思う。&lt;/p&gt;
+</content><category term="misc"></category></entry><entry><title>今週やったこと</title><link href="http://omasanori.github.io/blog/2013/08/25/what-i-did-2013w34/" rel="alternate"></link><published>2013-08-25T04:58:00+09:00</published><updated>2013-08-25T04:58:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-08-25:/blog/2013/08/25/what-i-did-2013w34/</id><summary type="html">&lt;p class="first last"&gt;待っていても文章が書けるわけでもないので、今週を振り返った。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;今週は &lt;a class="reference external" href="https://github.com/omasanori/msgpack-rust"&gt;https://github.com/omasanori/msgpack-rust&lt;/a&gt; でMessagePack for Rustを書き始めた。基本的な型のエンコードはできるようになったので、この調子で進めていきたい。文字と文字列の扱いはまだ決めかねている。&lt;/p&gt;
+&lt;p&gt;来週はあまり自由に時間を使えないので、MessagePack for Rustが進展するのは再来週のことになると思う。&lt;/p&gt;
+&lt;p&gt;Twitterに書いても問題ない長さだけど、せっかく使おうと決めたのでこちらに書く。&lt;/p&gt;
+</content><category term="misc"></category></entry><entry><title>Pelicanはじめました</title><link href="http://omasanori.github.io/blog/2013/08/17/hello/" rel="alternate"></link><published>2013-08-17T10:18:00+09:00</published><updated>2013-08-17T10:18:00+09:00</updated><author><name>Masanori Ogino</name></author><id>tag:omasanori.github.io,2013-08-17:/blog/2013/08/17/hello/</id><summary type="html">&lt;p class="first last"&gt;Pelicanでブログを始めようかな、と思い立った。&lt;/p&gt;
+</summary><content type="html">&lt;p&gt;しばらくブログの類を書いていなかった。Twitterなどを使っていると、ブログの管理画面が冗長に感じて面倒くさくなったからだ。&lt;/p&gt;
+&lt;p&gt;しかし、Twitterは文章を書くハードルは低いが長文を書くようにデザインされたものでなく、Facebookのプライバシー設定は割と厳しくしていてプログラミングネタに興味のある友人も少ない&lt;a class="footnote-reference" href="#id4" id="id1"&gt;[1]&lt;/a&gt;。Google+は使い分けに迷って放置している。&lt;/p&gt;
+&lt;p&gt;結果、コード例を含むまとまった量の文章を書く場所を持たない状態が続いた。年末のアドベントカレンダーでは以前から使っていたはてなダイアリーに加えてQiitaとGistで書いたものの、やはり面倒だと思った。長い文章を書く時は、書く環境に制約が少なくブラウザを開かなくとも管理できる方が私の好みに合っていた。&lt;/p&gt;
+&lt;p&gt;GitHub Pagesを使おうと思ってOctopressをいじっていた&lt;a class="footnote-reference" href="#id5" id="id2"&gt;[2]&lt;/a&gt;が、今ひとつピンとこなかったので放置していた。今思うと、Octopressを使おうと決断できなかった原因の一つは私がRubyを使い慣れていないことだったのかもしれない。&lt;/p&gt;
+&lt;p&gt;次に、Pythonで書かれていて&lt;abbr title="reStructuredText"&gt;reST&lt;/abbr&gt;が使えるPelicanに興味を持った。とても良い印象を持ったが、腰を据えて取り組む時間を取れるようになるまで決断を先送りにしていた。&lt;/p&gt;
+&lt;p&gt;今がその時だと思い立ったので、こうして最初の文章を書いている。色々なことをこれから決める必要があるけど、ひとまずこの調子で。デザインはデフォルトテーマではなく、自分で作ろうと思っている。別の場所で書いた文章も暇を見てこちらにコピーする&lt;a class="footnote-reference" href="#id6" id="id3"&gt;[3]&lt;/a&gt;。&lt;/p&gt;
+&lt;table class="docutils footnote" frame="void" id="id4" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id1"&gt;[1]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Facebook内外を問わず、友人そのものが少ない。その数少ない友人の中で私とプログラミングについて語り合える人はさらに少ない。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="id5" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id2"&gt;[2]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Octopressを使おうと思っていた頃、ちょっとしたパッチをOctopressに送り、そのパッチは無事に取り込まれた。GitHubのpull requestは気軽に小さなパッチを送れるので好き。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;table class="docutils footnote" frame="void" id="id6" rules="none"&gt;
+&lt;colgroup&gt;&lt;col class="label" /&gt;&lt;col /&gt;&lt;/colgroup&gt;
+&lt;tbody valign="top"&gt;
+&lt;tr&gt;&lt;td class="label"&gt;&lt;a class="fn-backref" href="#id3"&gt;[3]&lt;/a&gt;&lt;/td&gt;&lt;td&gt;今のところ、元々の場所に置いている版を削除するつもりはない。せいぜいこちらへのリンクを置く程度にしようと考えている。昨日まで見られたものが今日は見られなくなるというのは悲しい。&lt;/td&gt;&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+</content><category term="misc"></category></entry></feed>
